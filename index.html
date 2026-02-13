@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="ca">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sushi4Life</title>
+  <meta name="theme-color" content="#F6F7F9" />
+  <link rel="stylesheet" href="./styles.css" />
+
+  <!-- Leaflet -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">🍣</div>
+      <div class="brand-text">
+        <div class="title">Sushi4Life</div>
+        <div class="subtitle">Bufets a Barcelona • compartit</div>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <button class="iconbtn" id="btnRefresh" title="Actualitza" aria-label="Actualitza">↻</button>
+      <button class="btn primary" id="btnNewVisit">Nova visita</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Resum -->
+    <section class="summary card">
+      <div class="summary-left">
+        <div class="eyebrow">Comptador compartit</div>
+        <div class="big" id="totalVisits">—</div>
+        <div class="sub">visites registrades</div>
+      </div>
+
+      <div class="summary-right">
+        <div class="metric">
+          <div class="k">Aquest mes</div>
+          <div class="v" id="monthVisits">—</div>
+        </div>
+        <div class="metric">
+          <div class="k">Top lloc</div>
+          <div class="v" id="topPlace">—</div>
+        </div>
+        <div class="metric">
+          <div class="k">Ratxa</div>
+          <div class="v" id="streak">—</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tabs -->
+    <section class="tabs card">
+      <button class="tab active" data-tab="history">Historial</button>
+      <button class="tab" data-tab="map">Mapa</button>
+      <button class="tab" data-tab="calendar">Calendari</button>
+      <div class="tab-underline" aria-hidden="true"></div>
+    </section>
+
+    <!-- HISTORIAL -->
+    <section class="panel active" id="panel-history">
+      <div class="panel-head">
+        <h2>Visites</h2>
+        <div class="panel-actions">
+          <input class="input" id="searchInput" placeholder="Cerca lloc o notes…" />
+          <select class="select" id="placeFilter">
+            <option value="">Tots els llocs</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="visit-list" id="visitList"></div>
+
+      <div class="empty" id="emptyHistory" hidden>
+        <div class="empty-title">Encara no hi ha visites</div>
+        <div class="empty-sub">Clica “Nova visita” per començar.</div>
+      </div>
+    </section>
+
+    <!-- MAPA -->
+    <section class="panel" id="panel-map">
+      <div class="panel-head">
+        <h2>Mapa</h2>
+        <div class="panel-actions">
+          <button class="btn" id="btnFitMap">Ajusta marcadors</button>
+        </div>
+      </div>
+
+      <div class="map-wrap card">
+        <div id="map" class="map"></div>
+        <div class="map-legend">
+          <span class="legend-item"><span class="pin visited"></span> Visitats</span>
+          <span class="legend-item"><span class="pin unvisited"></span> Pendents</span>
+        </div>
+      </div>
+
+      <div class="places card">
+        <div class="places-head">
+          <h3>Llocs</h3>
+          <div class="muted">Toca un lloc per filtrar l’historial</div>
+        </div>
+        <div class="places-list" id="placesList"></div>
+      </div>
+    </section>
+
+    <!-- CALENDARI -->
+    <section class="panel" id="panel-calendar">
+      <div class="panel-head">
+        <h2>Calendari</h2>
+        <div class="panel-actions">
+          <button class="iconbtn" id="btnPrevMonth" aria-label="Mes anterior">←</button>
+          <div class="month-label" id="monthLabel">—</div>
+          <button class="iconbtn" id="btnNextMonth" aria-label="Mes següent">→</button>
+          <button class="btn" id="btnToday">Avui</button>
+        </div>
+      </div>
+
+      <div class="calendar card">
+        <div class="calendar-grid" id="calendarGrid"></div>
+      </div>
+
+      <div class="timeline card">
+        <div class="timeline-head">
+          <h3>Línia del temps</h3>
+          <div class="muted">Recents primer • toca per veure detalls</div>
+        </div>
+        <div class="timeline-list" id="timelineList"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL: NOVA VISITA -->
+  <div class="modal" id="modal" aria-hidden="true">
+    <div class="modal-backdrop" data-close="1"></div>
+
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title" id="modalTitle">Nova visita</div>
+          <div class="muted small">La foto és obligatòria.</div>
+        </div>
+        <button class="iconbtn" id="btnCloseModal" aria-label="Tanca">✕</button>
+      </div>
+
+      <form id="visitForm" class="form">
+        <div class="grid2">
+          <label class="field">
+            <span class="label">Data</span>
+            <input class="input" type="date" id="visitDate" required />
+          </label>
+
+          <label class="field">
+            <span class="label">Valoració (opcional)</span>
+            <select class="select" id="visitRating">
+              <option value="">—</option>
+              <option value="1">1 ⭐</option>
+              <option value="2">2 ⭐⭐</option>
+              <option value="3">3 ⭐⭐⭐</option>
+              <option value="4">4 ⭐⭐⭐⭐</option>
+              <option value="5">5 ⭐⭐⭐⭐⭐</option>
+            </select>
+          </label>
+        </div>
+
+        <label class="field">
+          <span class="label">Lloc</span>
+          <div class="row">
+            <select class="select grow" id="visitPlaceSelect">
+              <option value="">Tria un lloc existent…</option>
+            </select>
+            <button class="btn" type="button" id="btnToggleNewPlace">+ Nou lloc</button>
+          </div>
+        </label>
+
+        <div id="newPlaceBox" class="new-place" hidden>
+          <div class="grid2">
+            <label class="field">
+              <span class="label">Nom del lloc</span>
+              <input class="input" id="newPlaceName" placeholder="Ex: Sushi X Bufet" />
+            </label>
+            <label class="field">
+              <span class="label">Enllaç Google Maps (opcional)</span>
+              <input class="input" id="newPlaceLink" placeholder="https://maps.google.com/…" />
+            </label>
+          </div>
+
+          <div class="grid2">
+            <label class="field">
+              <span class="label">Latitud (opcional)</span>
+              <input class="input" id="newPlaceLat" inputmode="decimal" placeholder="41.3851" />
+            </label>
+            <label class="field">
+              <span class="label">Longitud (opcional)</span>
+              <input class="input" id="newPlaceLng" inputmode="decimal" placeholder="2.1734" />
+            </label>
+          </div>
+
+          <div class="muted small">Si no poses lat/long, el lloc sortirà igual a la llista.</div>
+        </div>
+
+        <label class="field">
+          <span class="label">Notes (opcional)</span>
+          <textarea class="textarea" id="visitNotes" placeholder="Què tal? què repetiríeu?"></textarea>
+        </label>
+
+        <div class="photo-box">
+          <div class="photo-head">
+            <div>
+              <div class="label">Foto (obligatòria)</div>
+              <div class="muted small">Càmera o galeria • compressió automàtica</div>
+            </div>
+
+            <div class="photo-actions">
+              <label class="btn">
+                <input
+                  type="file"
+                  id="photoInput"
+                  accept="image/*"
+                  capture="environment"
+                  hidden
+                  required
+                />
+                Afegir
+              </label>
+              <button class="btn" type="button" id="btnRemovePhoto" disabled>Treure</button>
+            </div>
+          </div>
+
+          <div class="photo-preview" id="photoPreview">
+            <div class="photo-placeholder">
+              <div class="muted">Afegeix una foto per guardar la visita.</div>
+            </div>
+          </div>
+
+          <div class="upload-meter" id="uploadMeter" hidden>
+            <div class="bar"><span id="uploadBar"></span></div>
+            <div class="muted small" id="uploadText">Pujant…</div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn" type="button" data-close="1">Cancel·la</button>
+          <button class="btn primary" type="submit" id="btnSubmitVisit">Guardar</button>
+        </div>
+
+        <div class="muted tiny">Compartit amb Firebase</div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: VEURE VISITA -->
+  <div class="modal" id="viewModal" aria-hidden="true">
+    <div class="modal-backdrop" data-close="2"></div>
+
+    <div class="modal-card wide" role="dialog" aria-modal="true">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title" id="viewTitle">—</div>
+          <div class="muted small">Detalls de la visita</div>
+        </div>
+        <button class="iconbtn" id="btnCloseView" aria-label="Tanca">✕</button>
+      </div>
+
+      <div class="view-grid">
+        <div class="view-photo">
+          <img id="viewImg" alt="Foto de la visita" />
+        </div>
+        <div class="view-meta">
+          <div class="kv">
+            <div class="k">Data</div><div class="v" id="viewDate">—</div>
+          </div>
+          <div class="kv">
+            <div class="k">Lloc</div><div class="v" id="viewPlace">—</div>
+          </div>
+          <div class="kv">
+            <div class="k">Valoració</div><div class="v" id="viewRating">—</div>
+          </div>
+          <div class="kv">
+            <div class="k">Notes</div><div class="v" id="viewNotes">—</div>
+          </div>
+          <div class="kv">
+            <div class="k">Maps</div><div class="v" id="viewMaps">—</div>
+          </div>
+
+          <div class="view-actions">
+            <button class="btn" id="btnFilterThisPlace">Filtrar per aquest lloc</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" hidden></div>
+
+  <!-- Leaflet -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
