@@ -411,8 +411,8 @@ body.picking .picking-banner { display: block; }
 <!-- Login -->
 <div class="login-screen" id="loginScreen">
   <div>
-    <div class="login-title">feliç any i mig</div>
-    <div style="text-align:center; margin-top:6px;" class="login-sub">t'estimo ;)</div>
+    <div class="login-title">el nostre mapa</div>
+    <div style="text-align:center; margin-top:6px;" class="login-sub">només per a nosaltres</div>
   </div>
   <div class="login-form">
     <input type="password" class="login-input" id="loginInput" placeholder="·····" onkeydown="if(event.key==='Enter') comprovarCodi()">
@@ -467,7 +467,7 @@ body.picking .picking-banner { display: block; }
     <div class="form-group">
       <label>Foto principal (opcional)</label>
       <div class="photo-upload-area">
-        <input type="file" accept="image/*" capture="environment" id="inputFoto" onchange="previsualitzar('inputFoto','fotoPreview')">
+        <input type="file" accept="image/*" id="inputFoto" onchange="previsualitzar('inputFoto','fotoPreview')">
         <div class="photo-upload-text">📷 Puja o fes una foto</div>
       </div>
       <img id="fotoPreview" class="photo-preview" alt="">
@@ -498,7 +498,7 @@ body.picking .picking-banner { display: block; }
     <div class="form-group">
       <label>Foto (opcional)</label>
       <div class="photo-upload-area">
-        <input type="file" accept="image/*" capture="environment" id="recInputFoto" onchange="previsualitzar('recInputFoto','recFotoPreview')">
+        <input type="file" accept="image/*" id="recInputFoto" onchange="previsualitzar('recInputFoto','recFotoPreview')">
         <div class="photo-upload-text">📷 Puja o fes una foto</div>
       </div>
       <img id="recFotoPreview" class="photo-preview" alt="">
