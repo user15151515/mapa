@@ -45,7 +45,7 @@ html, body {
 }
 .login-screen.hidden { display: none; }
 .login-title {
-  font-family: 'Cormorant Garamond', serif; font-size: 32px;
+  font-size: 32px;
   font-style: italic; font-weight: 300; color: var(--text); text-align: center;
 }
 .login-sub { font-size: 12px; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; }
@@ -143,7 +143,7 @@ header {
 @media (min-width: 600px) { .modal-handle { display: none; } }
 
 .modal-title {
-  font-family: 'Cormorant Garamond', serif; font-size: 22px;
+  font-size: 22px;
   font-weight: 300; font-style: italic; color: var(--text); margin-bottom: 20px;
 }
 .modal-close {
@@ -209,7 +209,7 @@ textarea { height: 90px; line-height: 1.6; }
 }
 .popup-no-img span { font-size: 10px; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; }
 .popup-inner { padding: 12px 14px 12px; }
-.popup-place { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-style: italic; color: var(--text); margin-bottom: 2px; }
+.popup-place { font-size: 16px; font-style: italic; color: var(--text); margin-bottom: 2px; }
 .popup-date { font-size: 10px; color: var(--text-muted); letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 6px; }
 .popup-text { font-size: 12px; font-weight: 300; color: var(--text); line-height: 1.6; margin-bottom: 10px; }
 .popup-actions { display: flex; align-items: center; justify-content: space-between; }
@@ -290,7 +290,7 @@ body.picking .picking-banner { display: block; }
   border-radius: 50%; width: 32px; height: 32px; font-size: 18px; color: var(--text-muted);
   cursor: pointer; display: flex; align-items: center; justify-content: center;
 }
-.lloc-nom { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-style: italic; font-weight: 300; color: var(--text); margin-bottom: 4px; padding-right: 36px; }
+.lloc-nom {  font-size: 26px; font-style: italic; font-weight: 300; color: var(--text); margin-bottom: 4px; padding-right: 36px; }
 .lloc-data { font-size: 11px; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
 .lloc-text { font-size: 13px; font-weight: 300; color: var(--text); line-height: 1.7; margin-bottom: 10px; }
 .lloc-edit-btn {
@@ -369,7 +369,7 @@ body.picking .picking-banner { display: block; }
   padding: 14px 16px; background: var(--warm-white); border-bottom: 1px solid var(--border);
   display: flex; align-items: center; gap: 12px; flex-shrink: 0;
 }
-.graella-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-style: italic; font-weight: 300; }
+.graella-title { font-size: 20px; font-style: italic; font-weight: 300; }
 .graella-close {
   margin-left: auto; background: none; border: none; font-size: 22px;
   color: var(--text-muted); cursor: pointer;
@@ -387,7 +387,7 @@ body.picking .picking-banner { display: block; }
   position: absolute; bottom: 0; left: 0; right: 0;
   background: linear-gradient(transparent, rgba(42,37,32,0.6));
   color: white; font-size: 10px; padding: 16px 6px 5px;
-  font-style: italic; font-family: 'Cormorant Garamond', serif;
+  font-style: italic; 
 }
 
 /* ── LOADING ── */
@@ -397,7 +397,7 @@ body.picking .picking-banner { display: block; }
   z-index: 9999; gap: 16px; transition: opacity 0.4s;
 }
 .loading.hidden { opacity: 0; pointer-events: none; }
-.loading-title { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-style: italic; font-weight: 300; color: var(--text); }
+.loading-title {  font-size: 28px; font-style: italic; font-weight: 300; color: var(--text); }
 .loading-sub { font-size: 11px; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; }
 
 /* ── LEAFLET ── */
@@ -411,8 +411,8 @@ body.picking .picking-banner { display: block; }
 <!-- Login -->
 <div class="login-screen" id="loginScreen">
   <div>
-    <div class="login-title">el nostre mapa</div>
-    <div style="text-align:center; margin-top:6px;" class="login-sub">només per a nosaltres</div>
+    <div class="login-title">feliç any i mig</div>
+    <div style="text-align:center; margin-top:6px;" class="login-sub">t'estimo ;)</div>
   </div>
   <div class="login-form">
     <input type="password" class="login-input" id="loginInput" placeholder="·····" onkeydown="if(event.key==='Enter') comprovarCodi()">
@@ -454,7 +454,7 @@ body.picking .picking-banner { display: block; }
     <input type="hidden" id="editLlocId">
     <div class="form-group">
       <label>Nom del lloc</label>
-      <input type="text" id="inputNom" placeholder="ex. La Barceloneta">
+      <input type="text" id="inputNom">
     </div>
     <div class="form-group">
       <label>Data</label>
@@ -834,7 +834,7 @@ function renderitzarLloc(id) {
       '<button class="btn-add-record" onclick="iniciarAfegirRecord(\'' + id + '\')">+ Afegir record</button>' +
     '</div>' +
     '<div class="records-grid" id="recordsGrid"></div>' +
-    '<p class="records-empty" id="recordsEmpty" style="display:none">Cap record encara. Afegeix-ne un!</p>';
+    '<p class="records-empty" id="recordsEmpty" style="display:none">cap record encara. afegeix un!</p>';
 
   carregarRecords(id);
 }
