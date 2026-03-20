@@ -14,393 +14,149 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
 :root {
-  --cream: #f7f4ef;
-  --warm-white: #fdfcfa;
-  --text: #2a2520;
-  --text-muted: #9a9088;
-  --accent: #c9846a;
-  --accent-light: #f0ddd5;
-  --border: #e8e2da;
-  --danger: #c0614a;
+  --cream: #f7f4ef; --warm-white: #fdfcfa; --text: #2a2520;
+  --text-muted: #9a9088; --accent: #c9846a; --accent-light: #f0ddd5;
+  --border: #e8e2da; --danger: #c0614a;
 }
-
-html, body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--cream);
-  color: var(--text);
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  -webkit-font-smoothing: antialiased;
-}
-
-/* ── LOGIN ── */
-.login-screen {
-  position: fixed; inset: 0; background: var(--cream);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  z-index: 99999; gap: 32px;
-}
+html, body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text); height: 100%; display: flex; flex-direction: column; overflow: hidden; -webkit-font-smoothing: antialiased; }
+.login-screen { position: fixed; inset: 0; background: var(--cream); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 99999; gap: 32px; }
 .login-screen.hidden { display: none; }
-.login-title {
-  font-size: 32px;
-  font-style: italic; font-weight: 300; color: var(--text); text-align: center;
-}
+.login-title { font-size: 32px; font-style: italic; font-weight: 300; color: var(--text); text-align: center; }
 .login-sub { font-size: 12px; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; }
 .login-form { display: flex; flex-direction: column; gap: 12px; width: 280px; }
-.login-input {
-  padding: 14px 16px; border: 1px solid var(--border); border-radius: 2px;
-  background: var(--warm-white); font-family: 'DM Sans', sans-serif; font-size: 16px;
-  font-weight: 300; color: var(--text); outline: none; text-align: center;
-  letter-spacing: 0.2em; transition: border-color 0.2s;
-}
+.login-input { padding: 14px 16px; border: 1px solid var(--border); border-radius: 2px; background: var(--warm-white); font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 300; color: var(--text); outline: none; text-align: center; letter-spacing: 0.2em; transition: border-color 0.2s; -webkit-appearance: none; }
 .login-input:focus { border-color: var(--accent); }
-.login-btn {
-  padding: 14px; background: var(--text); color: var(--warm-white); border: none;
-  border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 12px;
-  letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: background 0.2s;
-}
-.login-btn:hover { background: #444; }
+.login-btn { padding: 14px; background: var(--text); color: var(--warm-white); border: none; border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; }
 .login-error { font-size: 12px; color: var(--danger); text-align: center; min-height: 16px; }
-
-/* ── HEADER ── */
-header {
-  padding: 12px 16px 10px;
-  background: var(--warm-white);
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 12px;
-  flex-shrink: 0; z-index: 100;
-}
+header { padding: 12px 16px 10px; background: var(--warm-white); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; flex-shrink: 0; z-index: 100; }
 .header-title { font-size: 18px; font-weight: 300; font-style: italic; color: var(--text); }
 .header-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
 .counter { text-align: right; }
 .counter-num { font-size: 20px; font-weight: 300; color: var(--accent); line-height: 1; }
 .counter-label { font-size: 9px; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; }
-
-.btn-icon {
-  background: none; border: 1px solid var(--border); border-radius: 2px;
-  width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
-  cursor: pointer; color: var(--text-muted); font-size: 16px; transition: all 0.2s;
-  flex-shrink: 0;
-}
-.btn-icon:hover { border-color: var(--accent); color: var(--accent); }
-
-.btn-add {
-  background: var(--text); color: var(--warm-white); border: none;
-  padding: 0 14px; height: 36px; font-family: 'DM Sans', sans-serif; font-size: 11px;
-  font-weight: 300; letter-spacing: 0.06em; text-transform: uppercase;
-  cursor: pointer; border-radius: 2px; transition: background 0.2s; white-space: nowrap;
-  flex-shrink: 0;
-}
-.btn-add:hover { background: #444; }
-
-/* ── MAP ── */
+.btn-icon { background: none; border: 1px solid var(--border); border-radius: 2px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); font-size: 16px; flex-shrink: 0; }
+.btn-icon:active { border-color: var(--accent); color: var(--accent); }
+.btn-add { background: var(--text); color: var(--warm-white); border: none; padding: 0 14px; height: 36px; font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 300; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; border-radius: 2px; white-space: nowrap; flex-shrink: 0; }
 #map { flex: 1; width: 100%; }
-
-/* ── CLUSTER CUSTOM ── */
-.marker-cluster-small, .marker-cluster-medium, .marker-cluster-large {
-  background-color: rgba(201,132,106,0.2) !important;
-}
-.marker-cluster-small div, .marker-cluster-medium div, .marker-cluster-large div {
-  background-color: rgba(201,132,106,0.85) !important;
-  color: white !important;
-  font-family: 'DM Sans', sans-serif !important;
-  font-size: 12px !important;
-  font-weight: 400 !important;
-}
-
-/* ── MODALS BASE ── */
-.modal-overlay {
-  display: none; position: fixed; inset: 0;
-  background: rgba(42,37,32,0.5); z-index: 1000;
-  align-items: flex-end; justify-content: center;
-}
+.marker-cluster-small, .marker-cluster-medium, .marker-cluster-large { background-color: rgba(201,132,106,0.2) !important; }
+.marker-cluster-small div, .marker-cluster-medium div, .marker-cluster-large div { background-color: rgba(201,132,106,0.85) !important; color: white !important; font-family: 'DM Sans', sans-serif !important; font-size: 12px !important; }
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(42,37,32,0.5); z-index: 3500; align-items: flex-end; justify-content: center; }
 .modal-overlay.active { display: flex; }
-
-.modal {
-  background: var(--warm-white); border: 1px solid var(--border);
-  border-radius: 12px 12px 0 0; padding: 24px 20px 32px; width: 100%;
-  max-width: 480px; max-height: 92vh; overflow-y: auto;
-  position: relative; animation: slideUp 0.25s ease;
-}
-
-@media (min-width: 600px) {
-  .modal-overlay { align-items: center; }
-  .modal { border-radius: 4px; padding: 32px 28px 28px; max-height: 90vh; }
-}
-
-@keyframes slideUp {
-  from { transform: translateY(30px); opacity: 0; }
-  to   { transform: translateY(0); opacity: 1; }
-}
-
-.modal-handle {
-  width: 36px; height: 4px; background: var(--border);
-  border-radius: 2px; margin: 0 auto 20px; display: block;
-}
+.modal { background: var(--warm-white); border: 1px solid var(--border); border-radius: 12px 12px 0 0; padding: 24px 20px 32px; width: 100%; max-width: 480px; max-height: 92vh; overflow-y: auto; position: relative; animation: slideUp 0.25s ease; }
+@media (min-width: 600px) { .modal-overlay { align-items: center; } .modal { border-radius: 4px; padding: 32px 28px 28px; max-height: 90vh; } }
+@keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.modal-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; display: block; }
 @media (min-width: 600px) { .modal-handle { display: none; } }
-
-.modal-title {
-  font-size: 22px;
-  font-weight: 300; font-style: italic; color: var(--text); margin-bottom: 20px;
-}
-.modal-close {
-  position: absolute; top: 16px; right: 16px; background: none;
-  border: none; font-size: 22px; color: var(--text-muted); cursor: pointer;
-  width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
-}
-
+.modal-title { font-size: 22px; font-weight: 300; font-style: italic; color: var(--text); margin-bottom: 20px; }
+.modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 22px; color: var(--text-muted); cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
 .form-group { margin-bottom: 16px; }
-label {
-  display: block; font-size: 11px; letter-spacing: 0.08em;
-  text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;
-}
-input[type="text"], input[type="date"], input[type="password"], textarea {
-  width: 100%; padding: 12px 14px; border: 1px solid var(--border);
-  border-radius: 2px; background: var(--cream); font-family: 'DM Sans', sans-serif;
-  font-size: 16px; font-weight: 300; color: var(--text); outline: none;
-  transition: border-color 0.2s; resize: none; -webkit-appearance: none;
-}
+label { display: block; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+input[type="text"], input[type="date"], input[type="password"], textarea { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 2px; background: var(--cream); font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 300; color: var(--text); outline: none; transition: border-color 0.2s; resize: none; -webkit-appearance: none; }
 input:focus, textarea:focus { border-color: var(--accent); background: var(--warm-white); }
 textarea { height: 90px; line-height: 1.6; }
-
 .coords-display { font-size: 12px; color: var(--accent); font-style: italic; margin-bottom: 10px; min-height: 18px; }
-
-.photo-upload-area {
-  border: 1px dashed var(--border); border-radius: 2px; padding: 20px;
-  text-align: center; cursor: pointer; background: var(--cream);
-  transition: border-color 0.2s; position: relative;
-}
-.photo-upload-area:hover, .photo-upload-area:active { border-color: var(--accent); }
+.photo-upload-area { border: 1px dashed var(--border); border-radius: 2px; padding: 20px; text-align: center; cursor: pointer; background: var(--cream); position: relative; }
+.photo-upload-area:active { border-color: var(--accent); }
 .photo-upload-area input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
 .photo-upload-text { font-size: 13px; color: var(--text-muted); }
 .photo-preview { width: 100%; height: 120px; object-fit: cover; border-radius: 2px; display: none; margin-top: 10px; }
-
-.btn-save {
-  width: 100%; padding: 14px; background: var(--accent); color: white; border: none;
-  border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 13px;
-  letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; margin-top: 8px;
-  transition: background 0.2s; -webkit-appearance: none;
-}
+.btn-save { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; margin-top: 8px; -webkit-appearance: none; }
 .btn-save:active { background: #b87460; }
 .btn-save:disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; }
-.btn-secondary {
-  width: 100%; padding: 14px; background: var(--text); color: var(--warm-white);
-  border: none; border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 13px;
-  letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: background 0.2s;
-  -webkit-appearance: none;
-}
+.btn-secondary { width: 100%; padding: 14px; background: var(--text); color: var(--warm-white); border: none; border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; -webkit-appearance: none; }
 .btn-secondary:active { background: #444; }
-
-/* ── POPUP ── */
-.leaflet-popup-content-wrapper {
-  background: var(--warm-white); border: 1px solid var(--border); border-radius: 3px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.1); padding: 0; overflow: hidden;
-}
+.leaflet-popup-content-wrapper { background: var(--warm-white); border: 1px solid var(--border); border-radius: 3px; box-shadow: 0 4px 24px rgba(0,0,0,0.1); padding: 0; overflow: hidden; }
 .leaflet-popup-tip-container { margin-top: -1px; }
 .leaflet-popup-tip { background: var(--warm-white); }
 .leaflet-popup-content { margin: 0; min-width: 200px; max-width: 230px; }
 .popup-img { width: 100%; height: 120px; object-fit: cover; display: block; border-bottom: 1px solid var(--border); }
-.popup-no-img {
-  width: 100%; height: 50px; background: var(--accent-light);
-  display: flex; align-items: center; justify-content: center; border-bottom: 1px solid var(--border);
-}
+.popup-no-img { width: 100%; height: 50px; background: var(--accent-light); display: flex; align-items: center; justify-content: center; border-bottom: 1px solid var(--border); }
 .popup-no-img span { font-size: 10px; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; }
-.popup-inner { padding: 12px 14px 12px; }
+.popup-inner { padding: 12px 14px; }
 .popup-place { font-size: 16px; font-style: italic; color: var(--text); margin-bottom: 2px; }
 .popup-date { font-size: 10px; color: var(--text-muted); letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 6px; }
 .popup-text { font-size: 12px; font-weight: 300; color: var(--text); line-height: 1.6; margin-bottom: 10px; }
 .popup-actions { display: flex; align-items: center; justify-content: space-between; }
-.popup-btn-enter {
-  font-size: 11px; color: var(--accent); background: none; border: none;
-  cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; padding: 6px 0;
-}
-.popup-delete {
-  font-size: 10px; color: var(--text-muted); background: none; border: none;
-  cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; padding: 6px 0; transition: color 0.2s;
-}
+.popup-btn-enter { font-size: 11px; color: var(--accent); background: none; border: none; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; padding: 6px 0; }
+.popup-delete { font-size: 10px; color: var(--text-muted); background: none; border: none; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; padding: 6px 0; }
 .popup-delete:active { color: var(--danger); }
-
-/* ── PIN ── */
-.custom-pin {
-  width: 12px; height: 12px; background: var(--accent);
-  border: 2.5px solid white; border-radius: 50%;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2); cursor: pointer;
-}
-
-/* ── PICKING ── */
+.custom-pin { width: 12px; height: 12px; background: var(--accent); border: 2.5px solid white; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.2); cursor: pointer; }
+.foto-pin-wrap { width: 48px; height: 48px; border-radius: 6px; border: 2.5px solid white; box-shadow: 0 2px 10px rgba(0,0,0,0.25); overflow: hidden; cursor: pointer; background: var(--accent-light); display: flex; align-items: center; justify-content: center; }
+.foto-pin-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
 body.picking #map { cursor: crosshair; }
-.picking-banner {
-  display: none; position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-  background: var(--text); color: var(--warm-white); padding: 12px 24px;
-  border-radius: 24px; font-size: 13px; letter-spacing: 0.05em; text-transform: uppercase;
-  z-index: 999; white-space: nowrap; box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-}
+.picking-banner { display: none; position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--warm-white); padding: 12px 24px; border-radius: 24px; font-size: 13px; letter-spacing: 0.05em; text-transform: uppercase; z-index: 999; white-space: nowrap; box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
 body.picking .picking-banner { display: block; }
-
-/* ── TOAST ── */
-.toast {
-  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-  background: var(--text); color: var(--warm-white); padding: 10px 20px;
-  border-radius: 20px; font-size: 13px; z-index: 9000; opacity: 0;
-  transition: opacity 0.3s; pointer-events: none; white-space: nowrap;
-}
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--warm-white); padding: 10px 20px; border-radius: 20px; font-size: 13px; z-index: 9000; opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap; }
 .toast.show { opacity: 1; }
-
-/* ── LLOC MODAL (gran centrat) ── */
-.lloc-overlay {
-  display: none; position: fixed; inset: 0;
-  background: rgba(42,37,32,0.55); z-index: 2000;
-  align-items: flex-end; justify-content: center;
-}
+.lloc-overlay { display: none; position: fixed; inset: 0; background: rgba(42,37,32,0.55); z-index: 2000; align-items: flex-end; justify-content: center; }
 .lloc-overlay.active { display: flex; }
-
-.lloc-modal {
-  background: var(--warm-white); width: 100%; max-width: 680px;
-  height: 92vh; border-radius: 16px 16px 0 0;
-  overflow: hidden; display: flex; flex-direction: column;
-  animation: slideUp 0.3s ease;
-  box-shadow: 0 -4px 32px rgba(0,0,0,0.12);
-}
-
-@media (min-width: 700px) {
-  .lloc-overlay { align-items: center; }
-  .lloc-modal {
-    height: 85vh; border-radius: 8px;
-    box-shadow: 0 8px 48px rgba(0,0,0,0.18);
-  }
-}
-
-.lloc-modal-drag {
-  width: 36px; height: 4px; background: var(--border);
-  border-radius: 2px; margin: 12px auto 0; flex-shrink: 0;
-}
+.lloc-modal { background: var(--warm-white); width: 100%; max-width: 680px; height: 92vh; border-radius: 16px 16px 0 0; overflow: hidden; display: flex; flex-direction: column; animation: slideUp 0.3s ease; box-shadow: 0 -4px 32px rgba(0,0,0,0.12); }
+@media (min-width: 700px) { .lloc-overlay { align-items: center; } .lloc-modal { height: 85vh; border-radius: 8px; } }
+.lloc-modal-drag { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 12px auto 0; flex-shrink: 0; }
 @media (min-width: 700px) { .lloc-modal-drag { display: none; } }
-
-.lloc-header-img { width: 100%; height: 220px; object-fit: cover; display: block; flex-shrink: 0; }
-.lloc-header-nofoto { width: 100%; height: 60px; background: var(--accent-light); flex-shrink: 0; }
-
+.lloc-header { position: relative; flex-shrink: 0; }
+.lloc-header-img { width: 100%; height: 220px; object-fit: cover; display: block; }
+.lloc-header-nofoto { width: 100%; height: 60px; background: var(--accent-light); }
+.lloc-header-badge { position: absolute; bottom: 10px; right: 10px; background: rgba(42,37,32,0.55); color: white; font-size: 10px; letter-spacing: 0.07em; text-transform: uppercase; padding: 4px 8px; border-radius: 10px; }
 .lloc-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-
 .lloc-info { padding: 20px 20px 16px; border-bottom: 1px solid var(--border); position: relative; }
-.lloc-close {
-  position: absolute; top: 16px; right: 16px; background: var(--cream); border: none;
-  border-radius: 50%; width: 32px; height: 32px; font-size: 18px; color: var(--text-muted);
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-}
-.lloc-nom {  font-size: 26px; font-style: italic; font-weight: 300; color: var(--text); margin-bottom: 4px; padding-right: 36px; }
+.lloc-close { position: absolute; top: 16px; right: 16px; background: var(--cream); border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 18px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.lloc-nom { font-size: 26px; font-style: italic; font-weight: 300; color: var(--text); margin-bottom: 4px; padding-right: 36px; }
 .lloc-data { font-size: 11px; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
 .lloc-text { font-size: 13px; font-weight: 300; color: var(--text); line-height: 1.7; margin-bottom: 10px; }
-.lloc-edit-btn {
-  font-size: 11px; color: var(--text-muted); background: none; border: none;
-  cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; padding: 0;
-}
-.lloc-edit-btn:active { color: var(--accent); }
-
+.lloc-accions { display: flex; gap: 16px; }
+.lloc-edit-btn, .lloc-portada-btn { font-size: 11px; color: var(--text-muted); background: none; border: none; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; padding: 0; }
+.lloc-edit-btn:active, .lloc-portada-btn:active { color: var(--accent); }
 .lloc-records-header { padding: 16px 20px 10px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
 .lloc-records-title { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
-.btn-add-record {
-  font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase;
-  color: var(--warm-white); background: var(--accent); border: none;
-  padding: 8px 14px; border-radius: 2px; cursor: pointer;
-}
+.btn-add-record { font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--warm-white); background: var(--accent); border: none; padding: 8px 14px; border-radius: 2px; cursor: pointer; }
 .btn-add-record:active { background: #b87460; }
-
 .records-grid { padding: 0 16px 32px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 @media (min-width: 500px) { .records-grid { grid-template-columns: 1fr 1fr 1fr; } }
 .records-empty { padding: 16px 20px 24px; font-size: 13px; color: var(--text-muted); font-style: italic; }
-
-.record-card { border-radius: 4px; overflow: hidden; background: var(--cream); border: 1px solid var(--border); cursor: pointer; }
+.record-card { border-radius: 4px; overflow: hidden; background: var(--cream); border: 1px solid var(--border); cursor: pointer; position: relative; }
+.record-card.es-portada { border-color: var(--accent); }
+.record-portada-badge { position: absolute; top: 6px; left: 6px; background: var(--accent); color: white; font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 6px; border-radius: 8px; pointer-events: none; }
 .record-card-img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
 .record-card-nofoto { width: 100%; aspect-ratio: 1; background: var(--accent-light); display: flex; align-items: center; justify-content: center; }
 .record-card-nofoto span { font-size: 22px; }
 .record-card-body { padding: 8px 10px 10px; }
 .record-card-data { font-size: 10px; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 3px; }
 .record-card-text { font-size: 12px; font-weight: 300; color: var(--text); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-
-/* ── RECORD DETALL ── */
-.record-overlay {
-  display: none; position: fixed; inset: 0;
-  background: rgba(42,37,32,0.6); z-index: 3000;
-  align-items: flex-end; justify-content: center;
-}
+.record-overlay { display: none; position: fixed; inset: 0; background: rgba(42,37,32,0.6); z-index: 3000; align-items: flex-end; justify-content: center; }
 .record-overlay.active { display: flex; }
-.record-detall {
-  background: var(--warm-white); width: 100%; max-width: 480px;
-  max-height: 88vh; border-radius: 16px 16px 0 0;
-  overflow-y: auto; -webkit-overflow-scrolling: touch;
-  animation: slideUp 0.25s ease;
-}
-@media (min-width: 600px) {
-  .record-overlay { align-items: center; }
-  .record-detall { border-radius: 8px; max-height: 85vh; }
-}
+.record-detall { background: var(--warm-white); width: 100%; max-width: 480px; max-height: 88vh; border-radius: 16px 16px 0 0; overflow-y: auto; -webkit-overflow-scrolling: touch; animation: slideUp 0.25s ease; }
+@media (min-width: 600px) { .record-overlay { align-items: center; } .record-detall { border-radius: 8px; max-height: 85vh; } }
 .record-detall-drag { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 12px auto 0; }
 @media (min-width: 600px) { .record-detall-drag { display: none; } }
 .record-detall-img { width: 100%; max-height: 300px; object-fit: cover; display: block; }
 .record-detall-body { padding: 20px 20px 32px; position: relative; }
-.record-detall-close {
-  position: absolute; top: 16px; right: 16px; background: var(--cream); border: none;
-  border-radius: 50%; width: 32px; height: 32px; font-size: 18px; color: var(--text-muted);
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-}
+.record-detall-close { position: absolute; top: 16px; right: 16px; background: var(--cream); border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 18px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .record-detall-data { font-size: 11px; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; padding-right: 36px; }
 .record-detall-text { font-size: 14px; font-weight: 300; color: var(--text); line-height: 1.75; margin-bottom: 16px; }
-.record-detall-actions { display: flex; gap: 12px; }
-.record-detall-edit {
-  font-size: 11px; color: var(--text-muted); background: none; border: none;
-  cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; padding: 0;
-}
-.record-detall-delete {
-  font-size: 11px; color: var(--text-muted); background: none; border: none;
-  cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; padding: 0;
-}
+.record-detall-actions { display: flex; gap: 16px; flex-wrap: wrap; }
+.record-detall-edit, .record-detall-portada, .record-detall-delete { font-size: 11px; color: var(--text-muted); background: none; border: none; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; padding: 0; }
+.record-detall-portada:active { color: var(--accent); }
 .record-detall-delete:active { color: var(--danger); }
-
-/* ── GRAELLA GLOBAL ── */
-.graella-overlay {
-  display: none; position: fixed; inset: 0;
-  background: var(--cream); z-index: 4000; flex-direction: column;
-}
+.graella-overlay { display: none; position: fixed; inset: 0; background: var(--cream); z-index: 4000; flex-direction: column; }
 .graella-overlay.active { display: flex; }
-.graella-header {
-  padding: 14px 16px; background: var(--warm-white); border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 12px; flex-shrink: 0;
-}
+.graella-header { padding: 14px 16px; background: var(--warm-white); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
 .graella-title { font-size: 20px; font-style: italic; font-weight: 300; }
-.graella-close {
-  margin-left: auto; background: none; border: none; font-size: 22px;
-  color: var(--text-muted); cursor: pointer;
-}
+.graella-close { margin-left: auto; background: none; border: none; font-size: 22px; color: var(--text-muted); cursor: pointer; }
 .graella-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 16px; }
 .graella-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; }
 @media (min-width: 500px) { .graella-grid { grid-template-columns: repeat(4, 1fr); gap: 4px; } }
 @media (min-width: 800px) { .graella-grid { grid-template-columns: repeat(6, 1fr); gap: 4px; } }
 .graella-item { aspect-ratio: 1; overflow: hidden; cursor: pointer; background: var(--accent-light); position: relative; }
-.graella-item img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.2s; }
-.graella-item:active img { transform: scale(1.05); }
-.graella-item-nofoto { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: var(--accent-light); }
+.graella-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.graella-item-nofoto { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
 .graella-item-nofoto span { font-size: 10px; color: var(--accent); letter-spacing: 0.06em; text-transform: uppercase; text-align: center; padding: 4px; }
-.graella-lloc-label {
-  position: absolute; bottom: 0; left: 0; right: 0;
-  background: linear-gradient(transparent, rgba(42,37,32,0.6));
-  color: white; font-size: 10px; padding: 16px 6px 5px;
-  font-style: italic; 
-}
-
-/* ── LOADING ── */
-.loading {
-  position: fixed; inset: 0; background: var(--cream);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  z-index: 9999; gap: 16px; transition: opacity 0.4s;
-}
+.graella-lloc-label { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(42,37,32,0.6)); color: white; font-size: 10px; padding: 16px 6px 5px; font-style: italic; }
+.loading { position: fixed; inset: 0; background: var(--cream); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; gap: 16px; transition: opacity 0.4s; }
 .loading.hidden { opacity: 0; pointer-events: none; }
-.loading-title {  font-size: 28px; font-style: italic; font-weight: 300; color: var(--text); }
+.loading-title { font-size: 28px; font-style: italic; font-weight: 300; color: var(--text); }
 .loading-sub { font-size: 11px; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; }
-
-/* ── LEAFLET ── */
 .leaflet-control-zoom { border: 1px solid var(--border) !important; border-radius: 2px !important; box-shadow: none !important; }
 .leaflet-control-zoom a { color: var(--text) !important; font-weight: 300 !important; border-color: var(--border) !important; width: 32px !important; height: 32px !important; line-height: 32px !important; }
 .leaflet-control-attribution { font-size: 9px !important; background: rgba(253,252,250,0.85) !important; }
@@ -408,11 +164,10 @@ body.picking .picking-banner { display: block; }
 </head>
 <body>
 
-<!-- Login -->
 <div class="login-screen" id="loginScreen">
   <div>
     <div class="login-title">feliç any i mig</div>
-    <div style="text-align:center; margin-top:6px;" class="login-sub">t'estimo ;)</div>
+    <div style="text-align:center;margin-top:6px;" class="login-sub">t'estimo ;)</div>
   </div>
   <div class="login-form">
     <input type="password" class="login-input" id="loginInput" placeholder="·····" onkeydown="if(event.key==='Enter') comprovarCodi()">
@@ -421,13 +176,11 @@ body.picking .picking-banner { display: block; }
   </div>
 </div>
 
-<!-- Loading -->
 <div class="loading" id="loading">
   <div class="loading-title">el nostre mapa</div>
   <div class="loading-sub">carregant...</div>
 </div>
 
-<!-- Header -->
 <header>
   <div class="header-title">365+365/2</div>
   <div class="header-actions">
@@ -435,8 +188,8 @@ body.picking .picking-banner { display: block; }
       <div class="counter-num" id="dies">—</div>
       <div class="counter-label">dies juntes</div>
     </div>
-    <button class="btn-icon" onclick="sorpresa()" title="Lloc sorpresa">✦</button>
-    <button class="btn-icon" onclick="obrirGraella()" title="Tots els records">⊞</button>
+    <button class="btn-icon" onclick="sorpresa()">✦</button>
+    <button class="btn-icon" onclick="obrirGraella()">⊞</button>
     <button class="btn-add" onclick="iniciarAfegirPin()">+ Lloc</button>
   </div>
 </header>
@@ -445,7 +198,7 @@ body.picking .picking-banner { display: block; }
 <div class="picking-banner">Toca el mapa per triar la ubicació</div>
 <div class="toast" id="toast"></div>
 
-<!-- Modal: Nou / Editar lloc -->
+<!-- Modal: Nou lloc -->
 <div class="modal-overlay" id="modalLloc" onclick="tancarModalSiFons(event,'modalLloc')">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -461,11 +214,11 @@ body.picking .picking-banner { display: block; }
       <input type="date" id="inputData">
     </div>
     <div class="form-group">
-      <label>Comentari</label>
+      <label>Descripció</label>
       <textarea id="inputText" placeholder="algo especial a dir..."></textarea>
     </div>
-    <div class="form-group">
-      <label>Foto principal (opcional)</label>
+    <div class="form-group" id="fotoLlocGroup">
+      <label>Foto (serà la portada)</label>
       <div class="photo-upload-area">
         <input type="file" accept="image/*" id="inputFoto" onchange="previsualitzar('inputFoto','fotoPreview')">
         <div class="photo-upload-text">📷 Puja o fes una foto</div>
@@ -511,9 +264,7 @@ body.picking .picking-banner { display: block; }
 <div class="lloc-overlay" id="llocOverlay" onclick="tancarLlocSiFons(event)">
   <div class="lloc-modal">
     <div class="lloc-modal-drag"></div>
-    <div id="llocContingut" style="display:flex; flex-direction:column; flex:1; overflow:hidden;">
-      <div class="lloc-scroll" id="llocScroll"></div>
-    </div>
+    <div class="lloc-scroll" id="llocScroll"></div>
   </div>
 </div>
 
@@ -534,9 +285,7 @@ body.picking .picking-banner { display: block; }
 </div>
 
 <script>
-// ── CONFIG ──
 var CODI = 'elia';
-
 firebase.initializeApp({
   apiKey: "AIzaSyBprZ3QdL8RPwNH62cqUZA9fge5ylggLO8",
   authDomain: "mapa-b7373.firebaseapp.com",
@@ -547,7 +296,6 @@ firebase.initializeApp({
 });
 var db = firebase.firestore();
 
-// ── LOGIN ──
 function comprovarCodi() {
   var val = document.getElementById('loginInput').value.trim().toLowerCase();
   if (val === CODI) {
@@ -559,60 +307,44 @@ function comprovarCodi() {
   }
 }
 
-// ── INIT ──
+var map = null, clusterGroup = null, coordsTriades = null;
+var fotoFileLloc = null, fotoFileRecord = null;
+var markers = {}, llocData = {};
+var picking = false, tempMarker = null;
+var recordsListener = null, llocActualId = null;
+
 function inicialitzar() {
   var inici = new Date('2024-09-20');
   document.getElementById('dies').textContent = Math.floor((new Date() - inici) / 86400000);
-
-  map = L.map('map', { center: [41.5, 2.0], zoom: 7, zoomControl: true });
+  map = L.map('map', { center: [41.5, 2.0], zoom: 7 });
   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     attribution: '© OpenStreetMap © CARTO', subdomains: 'abcd', maxZoom: 19
   }).addTo(map);
-
   clusterGroup = L.markerClusterGroup({
     maxClusterRadius: 40,
     iconCreateFunction: function(cluster) {
-      var count = cluster.getChildCount();
+      var n = cluster.getChildCount();
       return L.divIcon({
-        html: '<div style="background:rgba(201,132,106,0.85);color:white;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:DM Sans,sans-serif;font-size:12px;border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.2);">' + count + '</div>',
-        className: '', iconSize: [32, 32], iconAnchor: [16, 16]
+        html: '<div style="background:rgba(201,132,106,0.85);color:white;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.2);">' + n + '</div>',
+        className: '', iconSize: [32,32], iconAnchor: [16,16]
       });
     }
   });
   map.addLayer(clusterGroup);
-
   map.on('click', function(e) {
     if (!picking) return;
     coordsTriades = { lat: e.latlng.lat, lng: e.latlng.lng };
     if (tempMarker) map.removeLayer(tempMarker);
-    tempMarker = L.circleMarker([e.latlng.lat, e.latlng.lng], {
-      radius: 6, color: '#c9846a', fillColor: '#c9846a', fillOpacity: 1, weight: 2
-    }).addTo(map);
+    tempMarker = L.circleMarker([e.latlng.lat, e.latlng.lng], { radius: 6, color: '#c9846a', fillColor: '#c9846a', fillOpacity: 1, weight: 2 }).addTo(map);
     document.body.classList.remove('picking');
     picking = false;
-    document.getElementById('coordsDisplay').textContent =
-      e.latlng.lat.toFixed(4) + ', ' + e.latlng.lng.toFixed(4);
+    document.getElementById('coordsDisplay').textContent = e.latlng.lat.toFixed(4) + ', ' + e.latlng.lng.toFixed(4);
     document.getElementById('modalLloc').classList.add('active');
   });
-
+  map.on('zoomend', function() { actualitzarIconesZoom(); });
   carregarPins();
 }
 
-// ── ESTAT ──
-var map = null;
-var clusterGroup = null;
-var coordsTriades = null;
-var fotoFileLloc = null;
-var fotoFileRecord = null;
-var markers = {};
-var llocData = {};
-var picking = false;
-var tempMarker = null;
-var recordsListener = null;
-var llocActualId = null;
-var editRecordId = null;
-
-// ── UTILS ──
 function previsualitzar(inputId, previewId) {
   var file = document.getElementById(inputId).files[0];
   if (!file) return;
@@ -628,8 +360,7 @@ function comprimirImatge(file) {
     var img = new Image();
     var url = URL.createObjectURL(file);
     img.onload = function() {
-      var maxW = 1000, q = 0.75;
-      var w = img.width, h = img.height;
+      var maxW = 1000, q = 0.75, w = img.width, h = img.height;
       if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
       var canvas = document.createElement('canvas');
       canvas.width = w; canvas.height = h;
@@ -643,28 +374,21 @@ function comprimirImatge(file) {
 
 function tancarModal(id) { document.getElementById(id).classList.remove('active'); }
 function tancarModalSiFons(e, id) { if (e.target === document.getElementById(id)) tancarModal(id); }
-
 function mostrarToast(msg) {
   var t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
   setTimeout(function() { t.classList.remove('show'); }, 2500);
 }
-
 function fmtData(d) {
   if (!d) return '';
   return new Date(d).toLocaleDateString('ca-ES', { year: 'numeric', month: 'long' });
 }
 
-// ── PINS ──
 function carregarPins() {
   db.collection('llocs').onSnapshot(function(snapshot) {
     snapshot.docChanges().forEach(function(change) {
-      var id = change.doc.id;
-      var d = change.doc.data();
-      if (change.type === 'added') {
-        llocData[id] = d;
-        afegirMarker(id, d);
-      }
+      var id = change.doc.id, d = change.doc.data();
+      if (change.type === 'added') { llocData[id] = d; afegirMarker(id, d); }
       if (change.type === 'modified') {
         llocData[id] = d;
         if (markers[id]) { clusterGroup.removeLayer(markers[id]); delete markers[id]; }
@@ -679,15 +403,56 @@ function carregarPins() {
   });
 }
 
-function afegirMarker(id, d) {
-  var icon = L.divIcon({
-    className: '', html: '<div class="custom-pin"></div>',
-    iconSize: [12, 12], iconAnchor: [6, 6]
-  });
-  var imatgeHTML = d.foto
-    ? '<img class="popup-img" src="' + d.foto + '" alt="' + d.nom + '">'
-    : '<div class="popup-no-img"><span>sense foto</span></div>';
+function iconPin() {
+  return L.divIcon({ className: '', html: '<div class="custom-pin"></div>', iconSize: [12,12], iconAnchor: [6,6] });
+}
 
+function iconFoto(foto) {
+  var html = foto
+    ? '<div class="foto-pin-wrap"><img src="' + foto + '" alt=""></div>'
+    : '<div class="foto-pin-wrap"></div>';
+  return L.divIcon({ className: '', html: html, iconSize: [48,48], iconAnchor: [24,24] });
+}
+
+// Cache de fotos aleatories per pin (es regenera cada cop que es crida actualitzarIconesZoom)
+var fotoPinCache = {};
+
+function obtenirFotoPerPin(id, d, callback) {
+  if (d.portadaAleatoria) {
+    db.collection('llocs').doc(id).collection('records').get().then(function(snap) {
+      var ambFoto = [];
+      snap.forEach(function(doc) { if (doc.data().foto) ambFoto.push(doc.data().foto); });
+      var foto = ambFoto.length > 0 ? ambFoto[Math.floor(Math.random() * ambFoto.length)] : null;
+      fotoPinCache[id] = foto;
+      callback(foto);
+    });
+  } else {
+    callback(d.portadaFoto || null);
+  }
+}
+
+function actualitzarIconesZoom() {
+  var zoom = map.getZoom();
+  Object.keys(markers).forEach(function(id) {
+    var d = llocData[id];
+    if (!d || !markers[id]) return;
+    if (zoom >= 12) {
+      obtenirFotoPerPin(id, d, function(foto) {
+        if (markers[id]) markers[id].setIcon(iconFoto(foto));
+      });
+    } else {
+      markers[id].setIcon(iconPin());
+    }
+  });
+}
+
+function afegirMarker(id, d) {
+  var zoom = map && map.getZoom ? map.getZoom() : 7;
+  var icon = iconPin();
+  var fotoPopup = d.portadaFoto || null;
+  var imatgeHTML = fotoPopup
+    ? '<img class="popup-img" src="' + fotoPopup + '" alt="' + d.nom + '">'
+    : '<div class="popup-no-img"><span>sense foto</span></div>';
   var popupHTML = imatgeHTML +
     '<div class="popup-inner">' +
       '<div class="popup-place">' + d.nom + '</div>' +
@@ -698,14 +463,17 @@ function afegirMarker(id, d) {
         '<button class="popup-delete" onclick="eliminarLloc(\'' + id + '\')">Eliminar</button>' +
       '</div>' +
     '</div>';
-
   var popup = L.popup({ maxWidth: 230, closeButton: false }).setContent(popupHTML);
   var marker = L.marker([d.lat, d.lng], { icon: icon }).bindPopup(popup);
   clusterGroup.addLayer(marker);
   markers[id] = marker;
+  if (zoom >= 12) {
+    obtenirFotoPerPin(id, d, function(foto) {
+      if (markers[id]) markers[id].setIcon(iconFoto(foto));
+    });
+  }
 }
 
-// ── AFEGIR / EDITAR LLOC ──
 function iniciarAfegirPin() {
   fotoFileLloc = null; coordsTriades = null;
   document.getElementById('editLlocId').value = '';
@@ -716,30 +484,24 @@ function iniciarAfegirPin() {
   document.getElementById('coordsDisplay').textContent = 'Cap ubicació triada';
   document.getElementById('fotoPreview').style.display = 'none';
   document.getElementById('inputFoto').value = '';
+  document.getElementById('fotoLlocGroup').style.display = 'block';
   document.getElementById('ubicacioGroup').style.display = 'block';
   document.getElementById('btnDesarLloc').textContent = 'Desar lloc';
   document.getElementById('modalLloc').classList.add('active');
 }
 
 function editarLloc(id) {
-  var d = llocData[id];
-  if (!d) return;
+  var d = llocData[id]; if (!d) return;
   fotoFileLloc = null;
   document.getElementById('editLlocId').value = id;
   document.getElementById('modalLlocTitol').textContent = 'Editar lloc';
   document.getElementById('inputNom').value = d.nom || '';
   document.getElementById('inputData').value = d.data || '';
   document.getElementById('inputText').value = d.text || '';
-  document.getElementById('coordsDisplay').textContent = 'Ubicació ja triada';
   coordsTriades = { lat: d.lat, lng: d.lng };
+  document.getElementById('fotoLlocGroup').style.display = 'none';
   document.getElementById('ubicacioGroup').style.display = 'none';
-  if (d.foto) {
-    document.getElementById('fotoPreview').src = d.foto;
-    document.getElementById('fotoPreview').style.display = 'block';
-  } else {
-    document.getElementById('fotoPreview').style.display = 'none';
-  }
-  document.getElementById('inputFoto').value = '';
+  document.getElementById('fotoPreview').style.display = 'none';
   document.getElementById('btnDesarLloc').textContent = 'Desar canvis';
   tancarLloc();
   document.getElementById('modalLloc').classList.add('active');
@@ -756,43 +518,35 @@ function desarLloc() {
   var data = document.getElementById('inputData').value;
   var text = document.getElementById('inputText').value.trim();
   var editId = document.getElementById('editLlocId').value;
-
   if (!nom) { mostrarToast('Escriu el nom del lloc'); return; }
   if (!editId && !coordsTriades) { mostrarToast('Tria la ubicació al mapa'); return; }
-
   var btn = document.getElementById('btnDesarLloc');
   btn.disabled = true; btn.textContent = 'Desant...';
 
   var guardar = function(foto) {
-    var dades = { nom: nom, data: data || null, text: text || null };
-    if (foto !== undefined) dades.foto = foto;
-
-    var p;
     if (editId) {
-      p = db.collection('llocs').doc(editId).update(dades);
+      db.collection('llocs').doc(editId).update({ nom: nom, data: data || null, text: text || null })
+        .then(function() { tancarModal('modalLloc'); mostrarToast('Lloc actualitzat!'); })
+        .catch(function(e) { console.error(e); mostrarToast('Error en desar.'); })
+        .finally(function() { btn.disabled = false; btn.textContent = 'Desar canvis'; });
     } else {
-      dades.lat = coordsTriades.lat;
-      dades.lng = coordsTriades.lng;
-      dades.creatEl = firebase.firestore.FieldValue.serverTimestamp();
-      p = db.collection('llocs').add(dades);
+      var dades = { nom: nom, data: data || null, text: text || null, lat: coordsTriades.lat, lng: coordsTriades.lng, portadaFoto: foto || null, portadaRecordId: null, creatEl: firebase.firestore.FieldValue.serverTimestamp() };
+      db.collection('llocs').add(dades).then(function(ref) {
+        var primerRecord = { data: data || null, text: text || null, foto: foto || null, esPortada: true, creatEl: firebase.firestore.FieldValue.serverTimestamp() };
+        return ref.collection('records').add(primerRecord).then(function(recRef) {
+          return ref.update({ portadaRecordId: recRef.id });
+        });
+      }).then(function() {
+        if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; }
+        tancarModal('modalLloc');
+        mostrarToast('Lloc desat!');
+      }).catch(function(e) { console.error(e); mostrarToast('Error en desar.'); })
+        .finally(function() { btn.disabled = false; btn.textContent = 'Desar lloc'; });
     }
-    p.then(function() {
-      if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; }
-      tancarModal('modalLloc');
-      mostrarToast(editId ? 'Lloc actualitzat!' : 'Lloc desat!');
-    }).catch(function(err) {
-      console.error(err); mostrarToast('Error en desar.');
-    }).finally(function() {
-      btn.disabled = false; btn.textContent = editId ? 'Desar canvis' : 'Desar lloc';
-    });
   };
 
-  if (fotoFileLloc) {
-    btn.textContent = 'Comprimint foto...';
-    comprimirImatge(fotoFileLloc).then(guardar);
-  } else {
-    guardar(undefined);
-  }
+  if (fotoFileLloc) { btn.textContent = 'Comprimint foto...'; comprimirImatge(fotoFileLloc).then(guardar); }
+  else guardar(null);
 }
 
 function eliminarLloc(id) {
@@ -805,7 +559,6 @@ function eliminarLloc(id) {
   }).then(function() { mostrarToast('Lloc eliminat'); });
 }
 
-// ── OBRIR LLOC ──
 function obrirLloc(id) {
   llocActualId = id;
   if (recordsListener) { recordsListener(); recordsListener = null; }
@@ -815,19 +568,21 @@ function obrirLloc(id) {
 
 function renderitzarLloc(id) {
   var d = llocData[id] || {};
-  var imatgeHTML = d.foto
-    ? '<img class="lloc-header-img" src="' + d.foto + '" alt="' + (d.nom || '') + '">'
-    : '<div class="lloc-header-nofoto"></div>';
-
-  var scroll = document.getElementById('llocScroll');
-  scroll.innerHTML =
+  var portadaFoto = d.portadaFoto || null;
+  var imatgeHTML = portadaFoto
+    ? '<div class="lloc-header"><img class="lloc-header-img" src="' + portadaFoto + '" alt=""><span class="lloc-header-badge">portada</span></div>'
+    : '<div class="lloc-header"><div class="lloc-header-nofoto"></div></div>';
+  document.getElementById('llocScroll').innerHTML =
     imatgeHTML +
     '<div class="lloc-info">' +
       '<button class="lloc-close" onclick="tancarLloc()">×</button>' +
       '<div class="lloc-nom">' + (d.nom || '') + '</div>' +
       (d.data ? '<div class="lloc-data">' + fmtData(d.data) + '</div>' : '') +
       (d.text ? '<div class="lloc-text">' + d.text + '</div>' : '') +
-      '<button class="lloc-edit-btn" onclick="editarLloc(\'' + id + '\')">Editar lloc</button>' +
+      '<div class="lloc-accions">' +
+        '<button class="lloc-edit-btn" onclick="editarLloc(\'' + id + '\')">Editar</button>' +
+        '<button class="lloc-portada-btn" onclick="triarPortadaAleatoria(\'' + id + '\')">Portada aleatòria</button>' +
+      '</div>' +
     '</div>' +
     '<div class="lloc-records-header">' +
       '<span class="lloc-records-title">Records</span>' +
@@ -835,7 +590,6 @@ function renderitzarLloc(id) {
     '</div>' +
     '<div class="records-grid" id="recordsGrid"></div>' +
     '<p class="records-empty" id="recordsEmpty" style="display:none">cap record encara. afegeix un!</p>';
-
   carregarRecords(id);
 }
 
@@ -844,226 +598,198 @@ function tancarLloc() {
   if (recordsListener) { recordsListener(); recordsListener = null; }
   llocActualId = null;
 }
+function tancarLlocSiFons(e) { if (e.target === document.getElementById('llocOverlay')) tancarLloc(); }
 
-function tancarLlocSiFons(e) {
-  if (e.target === document.getElementById('llocOverlay')) tancarLloc();
+function establirPortada(llocId, recordId, fotoRecord) {
+  var batch = db.batch();
+  batch.update(db.collection('llocs').doc(llocId), { portadaFoto: fotoRecord || null, portadaRecordId: recordId });
+  db.collection('llocs').doc(llocId).collection('records').get().then(function(snap) {
+    snap.forEach(function(doc) { batch.update(doc.ref, { esPortada: doc.id === recordId }); });
+    return batch.commit();
+  }).then(function() {
+    mostrarToast('Portada actualitzada!');
+    tancarRecordDetall();
+    renderitzarLloc(llocId);
+  });
 }
 
-// ── RECORDS ──
+function triarPortadaAleatoria(llocId) {
+  db.collection('llocs').doc(llocId).update({ portadaAleatoria: true })
+    .then(function() {
+      mostrarToast('Mode portada aleatoria activat!');
+      renderitzarLloc(llocId);
+    });
+}
+
 function carregarRecords(llocId) {
   if (recordsListener) recordsListener();
-  recordsListener = db.collection('llocs').doc(llocId)
-    .collection('records').orderBy('creatEl', 'asc')
+  recordsListener = db.collection('llocs').doc(llocId).collection('records').orderBy('creatEl', 'asc')
     .onSnapshot(function(snapshot) {
       var grid = document.getElementById('recordsGrid');
       var buit = document.getElementById('recordsEmpty');
       if (!grid) return;
+      var portadaId = (llocData[llocId] && llocData[llocId].portadaRecordId) || null;
       snapshot.docChanges().forEach(function(change) {
-        var id = change.doc.id;
-        var r = change.doc.data();
-        if (change.type === 'added') {
-          var card = document.createElement('div');
-          card.className = 'record-card';
+        var id = change.doc.id, r = change.doc.data();
+        var esPortada = (id === portadaId) || r.esPortada;
+        if (change.type === 'added' || change.type === 'modified') {
+          var existent = document.getElementById('rc-' + id);
+          var card = existent || document.createElement('div');
+          card.className = 'record-card' + (esPortada ? ' es-portada' : '');
           card.id = 'rc-' + id;
-          card.onclick = function() { obrirRecordDetall(llocId, id, r); };
+          card.onclick = (function(rid, rdata) { return function() { obrirRecordDetall(llocId, rid, rdata); }; })(id, r);
           card.innerHTML =
-            (r.foto
-              ? '<img class="record-card-img" src="' + r.foto + '" alt="">'
-              : '<div class="record-card-nofoto"><span>✦</span></div>') +
+            (esPortada ? '<div class="record-portada-badge">portada</div>' : '') +
+            (r.foto ? '<img class="record-card-img" src="' + r.foto + '" alt="">' : '<div class="record-card-nofoto"><span>✦</span></div>') +
             '<div class="record-card-body">' +
               (r.data ? '<div class="record-card-data">' + fmtData(r.data) + '</div>' : '') +
               (r.text ? '<div class="record-card-text">' + r.text + '</div>' : '') +
             '</div>';
-          grid.appendChild(card);
+          if (!existent) grid.appendChild(card);
         }
-        if (change.type === 'modified') {
-          var el = document.getElementById('rc-' + id);
-          if (el) {
-            el.onclick = function() { obrirRecordDetall(llocId, id, r); };
-            el.innerHTML =
-              (r.foto
-                ? '<img class="record-card-img" src="' + r.foto + '" alt="">'
-                : '<div class="record-card-nofoto"><span>✦</span></div>') +
-              '<div class="record-card-body">' +
-                (r.data ? '<div class="record-card-data">' + fmtData(r.data) + '</div>' : '') +
-                (r.text ? '<div class="record-card-text">' + r.text + '</div>' : '') +
-              '</div>';
-          }
-        }
-        if (change.type === 'removed') {
-          var rem = document.getElementById('rc-' + id);
-          if (rem) rem.remove();
-        }
+        if (change.type === 'removed') { var rem = document.getElementById('rc-' + id); if (rem) rem.remove(); }
       });
       if (buit) buit.style.display = (grid.children.length === 0) ? 'block' : 'none';
     });
 }
 
 function obrirRecordDetall(llocId, recordId, r) {
-  var html =
+  var esPortada = (llocData[llocId] && llocData[llocId].portadaRecordId === recordId) || r.esPortada;
+  var fotoEsc = r.foto ? '\'' + r.foto.replace(/'/g, '') + '\'' : 'null';
+  document.getElementById('recordDetall').innerHTML =
     '<div class="record-detall-drag"></div>' +
     (r.foto ? '<img class="record-detall-img" src="' + r.foto + '" alt="">' : '') +
     '<div class="record-detall-body">' +
       '<button class="record-detall-close" onclick="tancarRecordDetall()">×</button>' +
-      (r.data ? '<div class="record-detall-data">' + fmtData(r.data) + '</div>' : '') +
+      (r.data ? '<div class="record-detall-data">' + fmtData(r.data) + (esPortada ? ' · portada' : '') + '</div>' : '') +
       (r.text ? '<div class="record-detall-text">' + r.text + '</div>' : '') +
       '<div class="record-detall-actions">' +
         '<button class="record-detall-edit" onclick="editarRecord(\'' + llocId + '\',\'' + recordId + '\')">Editar</button>' +
+        (!esPortada ? '<button class="record-detall-portada" onclick="establirPortada(\'' + llocId + '\',\'' + recordId + '\',' + fotoEsc + ')">Fer portada</button>' : '') +
         '<button class="record-detall-delete" onclick="eliminarRecord(\'' + llocId + '\',\'' + recordId + '\')">Eliminar</button>' +
       '</div>' +
     '</div>';
-  document.getElementById('recordDetall').innerHTML = html;
   document.getElementById('recordOverlay').classList.add('active');
 }
 
 function tancarRecordDetall() { document.getElementById('recordOverlay').classList.remove('active'); }
 function tancarRecordSiFons(e) { if (e.target === document.getElementById('recordOverlay')) tancarRecordDetall(); }
 
-// ── AFEGIR / EDITAR RECORD ──
 function iniciarAfegirRecord(llocId) {
-  fotoFileRecord = null; editRecordId = null;
-  document.getElementById('modalRecordTitol').textContent = 'Nou record';
-  document.getElementById('recInputData').value = '';
-  document.getElementById('recInputText').value = '';
-  document.getElementById('recFotoPreview').style.display = 'none';
-  document.getElementById('recInputFoto').value = '';
-  document.getElementById('btnDesarRecord').dataset.llocId = llocId;
-  document.getElementById('btnDesarRecord').dataset.recordId = '';
-  document.getElementById('btnDesarRecord').textContent = 'Desar record';
-  document.getElementById('modalRecord').classList.add('active');
+  var obrirFormulari = function() {
+    fotoFileRecord = null;
+    document.getElementById('modalRecordTitol').textContent = 'Nou record';
+    document.getElementById('recInputData').value = '';
+    document.getElementById('recInputText').value = '';
+    document.getElementById('recFotoPreview').style.display = 'none';
+    document.getElementById('recInputFoto').value = '';
+    document.getElementById('btnDesarRecord').dataset.llocId = llocId;
+    document.getElementById('btnDesarRecord').dataset.recordId = '';
+    document.getElementById('btnDesarRecord').textContent = 'Desar record';
+    document.getElementById('modalRecord').classList.add('active');
+  };
+  var overlay = document.getElementById('recordOverlay');
+  if (overlay.classList.contains('active')) {
+    overlay.classList.remove('active');
+    setTimeout(obrirFormulari, 250);
+  } else {
+    obrirFormulari();
+  }
 }
 
 function editarRecord(llocId, recordId) {
   tancarRecordDetall();
-  db.collection('llocs').doc(llocId).collection('records').doc(recordId).get()
-    .then(function(doc) {
-      var r = doc.data();
-      fotoFileRecord = null; editRecordId = recordId;
-      document.getElementById('modalRecordTitol').textContent = 'Editar record';
-      document.getElementById('recInputData').value = r.data || '';
-      document.getElementById('recInputText').value = r.text || '';
-      if (r.foto) {
-        document.getElementById('recFotoPreview').src = r.foto;
-        document.getElementById('recFotoPreview').style.display = 'block';
-      } else {
-        document.getElementById('recFotoPreview').style.display = 'none';
-      }
-      document.getElementById('recInputFoto').value = '';
-      document.getElementById('btnDesarRecord').dataset.llocId = llocId;
-      document.getElementById('btnDesarRecord').dataset.recordId = recordId;
-      document.getElementById('btnDesarRecord').textContent = 'Desar canvis';
-      document.getElementById('modalRecord').classList.add('active');
-    });
+  db.collection('llocs').doc(llocId).collection('records').doc(recordId).get().then(function(doc) {
+    var r = doc.data(); fotoFileRecord = null;
+    document.getElementById('modalRecordTitol').textContent = 'Editar record';
+    document.getElementById('recInputData').value = r.data || '';
+    document.getElementById('recInputText').value = r.text || '';
+    if (r.foto) { document.getElementById('recFotoPreview').src = r.foto; document.getElementById('recFotoPreview').style.display = 'block'; }
+    else document.getElementById('recFotoPreview').style.display = 'none';
+    document.getElementById('recInputFoto').value = '';
+    document.getElementById('btnDesarRecord').dataset.llocId = llocId;
+    document.getElementById('btnDesarRecord').dataset.recordId = recordId;
+    document.getElementById('btnDesarRecord').textContent = 'Desar canvis';
+    document.getElementById('modalRecord').classList.add('active');
+  });
 }
 
 function desarRecord() {
   var btn = document.getElementById('btnDesarRecord');
-  var llocId = btn.dataset.llocId;
-  var recordId = btn.dataset.recordId;
+  var llocId = btn.dataset.llocId, recordId = btn.dataset.recordId;
   if (!llocId) { mostrarToast('Error: torna a obrir el lloc'); return; }
-
   var data = document.getElementById('recInputData').value;
   var text = document.getElementById('recInputText').value.trim();
   if (!text && !fotoFileRecord && !recordId) { mostrarToast('Afegeix una foto o una descripció'); return; }
-
   btn.disabled = true; btn.textContent = 'Desant...';
 
   var guardar = function(foto) {
     var dades = { data: data || null, text: text || null };
     if (foto !== undefined) dades.foto = foto;
-
     var p;
     if (recordId) {
       p = db.collection('llocs').doc(llocId).collection('records').doc(recordId).update(dades);
+      if (foto !== undefined && llocData[llocId] && llocData[llocId].portadaRecordId === recordId) {
+        p = p.then(function() { return db.collection('llocs').doc(llocId).update({ portadaFoto: foto || null }); });
+      }
     } else {
+      dades.esPortada = false;
       dades.creatEl = firebase.firestore.FieldValue.serverTimestamp();
       p = db.collection('llocs').doc(llocId).collection('records').add(dades);
     }
-    p.then(function() {
-      tancarModal('modalRecord');
-      mostrarToast(recordId ? 'Record actualitzat!' : 'Record desat!');
-    }).catch(function(err) {
-      console.error(err); mostrarToast('Error en desar.');
-    }).finally(function() {
-      btn.disabled = false;
-      btn.textContent = recordId ? 'Desar canvis' : 'Desar record';
-    });
+    p.then(function() { tancarModal('modalRecord'); mostrarToast(recordId ? 'Record actualitzat!' : 'Record desat!'); })
+     .catch(function(e) { console.error(e); mostrarToast('Error en desar.'); })
+     .finally(function() { btn.disabled = false; btn.textContent = recordId ? 'Desar canvis' : 'Desar record'; });
   };
 
-  if (fotoFileRecord) {
-    btn.textContent = 'Comprimint foto...';
-    comprimirImatge(fotoFileRecord).then(guardar);
-  } else {
-    guardar(undefined);
-  }
+  if (fotoFileRecord) { btn.textContent = 'Comprimint foto...'; comprimirImatge(fotoFileRecord).then(guardar); }
+  else guardar(undefined);
 }
 
 function eliminarRecord(llocId, recordId) {
   if (!confirm('Eliminar aquest record?')) return;
+  var esPortada = llocData[llocId] && llocData[llocId].portadaRecordId === recordId;
   tancarRecordDetall();
-  db.collection('llocs').doc(llocId).collection('records').doc(recordId).delete()
-    .then(function() { mostrarToast('Record eliminat'); });
+  db.collection('llocs').doc(llocId).collection('records').doc(recordId).delete().then(function() {
+    if (esPortada) return db.collection('llocs').doc(llocId).update({ portadaFoto: null, portadaRecordId: null });
+  }).then(function() { mostrarToast('Record eliminat'); });
 }
 
-// ── SORPRESA ──
 function sorpresa() {
   var ids = Object.keys(llocData);
   if (ids.length === 0) { mostrarToast('Encara no hi ha llocs!'); return; }
-  var id = ids[Math.floor(Math.random() * ids.length)];
-  var d = llocData[id];
+  var id = ids[Math.floor(Math.random() * ids.length)], d = llocData[id];
   map.setView([d.lat, d.lng], 14, { animate: true });
-  setTimeout(function() {
-    if (markers[id]) markers[id].openPopup();
-  }, 600);
+  setTimeout(function() { if (markers[id]) markers[id].openPopup(); }, 600);
 }
 
-// ── GRAELLA GLOBAL ──
 function obrirGraella() {
   document.getElementById('graellaOverlay').classList.add('active');
   var grid = document.getElementById('graellaGrid');
   grid.innerHTML = '';
-
   var ids = Object.keys(llocData);
-  if (ids.length === 0) {
-    grid.innerHTML = '<p style="padding:20px;color:var(--text-muted);font-style:italic;grid-column:1/-1;">Encara no hi ha llocs.</p>';
-    return;
-  }
-
-  var promeses = ids.map(function(llocId) {
-    return db.collection('llocs').doc(llocId).collection('records').get()
-      .then(function(snap) {
-        var items = [];
-        snap.forEach(function(doc) {
-          items.push({ llocId: llocId, recordId: doc.id, data: doc.data(), nom: llocData[llocId] ? llocData[llocId].nom : '' });
-        });
-        return items;
-      });
-  });
-
-  Promise.all(promeses).then(function(resultats) {
+  if (ids.length === 0) { grid.innerHTML = '<p style="padding:20px;color:var(--text-muted);font-style:italic;grid-column:1/-1;">Encara no hi ha llocs.</p>'; return; }
+  Promise.all(ids.map(function(llocId) {
+    return db.collection('llocs').doc(llocId).collection('records').get().then(function(snap) {
+      var items = [];
+      snap.forEach(function(doc) { items.push({ llocId: llocId, data: doc.data(), nom: llocData[llocId] ? llocData[llocId].nom : '' }); });
+      return items;
+    });
+  })).then(function(resultats) {
     var tots = [];
     resultats.forEach(function(items) { tots = tots.concat(items); });
-
-    if (tots.length === 0) {
-      grid.innerHTML = '<p style="padding:20px;color:var(--text-muted);font-style:italic;grid-column:1/-1;">Encara no hi ha records.</p>';
-      return;
-    }
-
+    if (tots.length === 0) { grid.innerHTML = '<p style="padding:20px;color:var(--text-muted);font-style:italic;grid-column:1/-1;">Encara no hi ha records.</p>'; return; }
     tots.forEach(function(item) {
       var el = document.createElement('div');
       el.className = 'graella-item';
       el.innerHTML = item.data.foto
         ? '<img src="' + item.data.foto + '" alt="' + item.nom + '"><div class="graella-lloc-label">' + item.nom + '</div>'
         : '<div class="graella-item-nofoto"><span>' + item.nom + '</span></div>';
-      el.onclick = function() {
-        tancarGraella();
-        obrirLloc(item.llocId);
-      };
+      el.onclick = function() { tancarGraella(); obrirLloc(item.llocId); };
       grid.appendChild(el);
     });
   });
 }
-
 function tancarGraella() { document.getElementById('graellaOverlay').classList.remove('active'); }
 </script>
 </body>
