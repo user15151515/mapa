@@ -3,6 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Mapa">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#f7f4ef">
 <title>El nostre mapa</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -12,6 +18,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 :root {
@@ -20,17 +27,21 @@
   --border: #e8e2da; --danger: #c0614a;
 }
 html, body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text); height: 100%; display: flex; flex-direction: column; overflow: hidden; -webkit-font-smoothing: antialiased; }
-.login-screen { position: fixed; inset: 0; background: var(--cream); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 99999; gap: 32px; }
+.login-screen { position: fixed; inset: 0; background: var(--cream); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 99999; gap: 28px; padding: 24px; }
 .login-screen.hidden { display: none; }
-.login-title { font-size: 32px; font-style: italic; font-weight: 300; color: var(--text); text-align: center; }
-.login-sub { font-size: 12px; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; }
-.login-form { display: flex; flex-direction: column; gap: 12px; width: 280px; }
-.login-input { padding: 14px 16px; border: 1px solid var(--border); border-radius: 2px; background: var(--warm-white); font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 300; color: var(--text); outline: none; text-align: center; letter-spacing: 0.2em; transition: border-color 0.2s; -webkit-appearance: none; }
+.login-title { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-style: italic; font-weight: 300; color: var(--text); text-align: center; line-height: 1.2; }
+.login-sub { font-size: 12px; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; text-align: center; }
+.login-form { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 280px; }
+.login-user-btns { display: flex; gap: 10px; }
+.login-user-btn { flex: 1; padding: 14px 8px; border: 1px solid var(--border); border-radius: 2px; background: var(--warm-white); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 300; color: var(--text-muted); cursor: pointer; text-align: center; transition: all 0.2s; letter-spacing: 0.04em; }
+.login-user-btn.selected { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+.login-input { padding: 14px 16px; border: 1px solid var(--border); border-radius: 2px; background: var(--warm-white); font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 300; color: var(--text); outline: none; text-align: center; letter-spacing: 0.15em; transition: border-color 0.2s; -webkit-appearance: none; }
 .login-input:focus { border-color: var(--accent); }
 .login-btn { padding: 14px; background: var(--text); color: var(--warm-white); border: none; border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; }
+.login-btn:active { background: #444; }
 .login-error { font-size: 12px; color: var(--danger); text-align: center; min-height: 16px; }
 header { padding: 12px 16px 10px; background: var(--warm-white); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; flex-shrink: 0; z-index: 100; }
-.header-title { font-size: 18px; font-weight: 300; font-style: italic; color: var(--text); }
+.header-title { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 300; font-style: italic; color: var(--text); }
 .header-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
 .counter { text-align: right; }
 .counter-num { font-size: 20px; font-weight: 300; color: var(--accent); line-height: 1; }
@@ -38,6 +49,8 @@ header { padding: 12px 16px 10px; background: var(--warm-white); border-bottom: 
 .btn-icon { background: none; border: 1px solid var(--border); border-radius: 2px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); font-size: 16px; flex-shrink: 0; }
 .btn-icon:active { border-color: var(--accent); color: var(--accent); }
 .btn-add { background: var(--text); color: var(--warm-white); border: none; padding: 0 14px; height: 36px; font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 300; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; border-radius: 2px; white-space: nowrap; flex-shrink: 0; }
+.user-badge { font-size: 10px; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; border: 1px solid var(--border); border-radius: 2px; padding: 4px 8px; cursor: pointer; background: none; font-family: 'DM Sans', sans-serif; white-space: nowrap; }
+.user-badge:active { color: var(--danger); border-color: var(--danger); }
 #map { flex: 1; width: 100%; }
 .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large { background-color: rgba(201,132,106,0.2) !important; }
 .marker-cluster-small div, .marker-cluster-medium div, .marker-cluster-large div { background-color: rgba(201,132,106,0.85) !important; color: white !important; font-family: 'DM Sans', sans-serif !important; font-size: 12px !important; }
@@ -48,11 +61,11 @@ header { padding: 12px 16px 10px; background: var(--warm-white); border-bottom: 
 @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 .modal-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; display: block; }
 @media (min-width: 600px) { .modal-handle { display: none; } }
-.modal-title { font-size: 22px; font-weight: 300; font-style: italic; color: var(--text); margin-bottom: 20px; }
+.modal-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 300; font-style: italic; color: var(--text); margin-bottom: 20px; }
 .modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 22px; color: var(--text-muted); cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
 .form-group { margin-bottom: 16px; }
 label { display: block; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
-input[type="text"], input[type="date"], input[type="password"], textarea { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 2px; background: var(--cream); font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 300; color: var(--text); outline: none; transition: border-color 0.2s; resize: none; -webkit-appearance: none; }
+input[type="text"], input[type="date"], input[type="email"], input[type="password"], textarea { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 2px; background: var(--cream); font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 300; color: var(--text); outline: none; transition: border-color 0.2s; resize: none; -webkit-appearance: none; }
 input:focus, textarea:focus { border-color: var(--accent); background: var(--warm-white); }
 textarea { height: 90px; line-height: 1.6; }
 .coords-display { font-size: 12px; color: var(--accent); font-style: italic; margin-bottom: 10px; min-height: 18px; }
@@ -74,8 +87,7 @@ textarea { height: 90px; line-height: 1.6; }
 .popup-no-img { width: 100%; height: 50px; background: var(--accent-light); display: flex; align-items: center; justify-content: center; border-bottom: 1px solid var(--border); }
 .popup-no-img span { font-size: 10px; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; }
 .popup-inner { padding: 12px 14px; }
-.popup-place { font-size: 16px; font-style: italic; color: var(--text); margin-bottom: 2px; }
-.popup-date { font-size: 10px; color: var(--text-muted); letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 6px; }
+.popup-place { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-style: italic; color: var(--text); margin-bottom: 4px; }
 .popup-text { font-size: 12px; font-weight: 300; color: var(--text); line-height: 1.6; margin-bottom: 10px; }
 .popup-actions { display: flex; align-items: center; justify-content: space-between; }
 .popup-btn-enter { font-size: 11px; color: var(--accent); background: none; border: none; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; padding: 6px 0; }
@@ -102,12 +114,12 @@ body.picking .picking-banner { display: block; }
 .lloc-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 .lloc-info { padding: 20px 20px 16px; border-bottom: 1px solid var(--border); position: relative; }
 .lloc-close { position: absolute; top: 16px; right: 16px; background: var(--cream); border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 18px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.lloc-nom { font-size: 26px; font-style: italic; font-weight: 300; color: var(--text); margin-bottom: 4px; padding-right: 36px; }
-.lloc-data { font-size: 11px; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
-.lloc-text { font-size: 13px; font-weight: 300; color: var(--text); line-height: 1.7; margin-bottom: 10px; }
-.lloc-accions { display: flex; gap: 16px; }
+.lloc-nom { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-style: italic; font-weight: 300; color: var(--text); margin-bottom: 6px; padding-right: 36px; }
+.lloc-desc { font-size: 13px; font-weight: 300; color: var(--text); line-height: 1.7; margin-bottom: 12px; }
+.lloc-accions { display: flex; gap: 16px; flex-wrap: wrap; }
 .lloc-edit-btn, .lloc-portada-btn { font-size: 11px; color: var(--text-muted); background: none; border: none; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; padding: 0; }
-.lloc-edit-btn:active, .lloc-portada-btn:active { color: var(--accent); }
+.lloc-portada-btn.actiu { color: var(--accent); }
+.lloc-edit-btn:active, .lloc-portada-btn:active { opacity: 0.6; }
 .lloc-records-header { padding: 16px 20px 10px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
 .lloc-records-title { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
 .btn-add-record { font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--warm-white); background: var(--accent); border: none; padding: 8px 14px; border-radius: 2px; cursor: pointer; }
@@ -122,7 +134,8 @@ body.picking .picking-banner { display: block; }
 .record-card-nofoto { width: 100%; aspect-ratio: 1; background: var(--accent-light); display: flex; align-items: center; justify-content: center; }
 .record-card-nofoto span { font-size: 22px; }
 .record-card-body { padding: 8px 10px 10px; }
-.record-card-data { font-size: 10px; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 3px; }
+.record-card-meta { font-size: 10px; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 3px; display: flex; justify-content: space-between; align-items: center; }
+.record-card-user { color: var(--accent); font-weight: 400; }
 .record-card-text { font-size: 12px; font-weight: 300; color: var(--text); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .record-overlay { display: none; position: fixed; inset: 0; background: rgba(42,37,32,0.6); z-index: 3000; align-items: flex-end; justify-content: center; }
 .record-overlay.active { display: flex; }
@@ -133,7 +146,8 @@ body.picking .picking-banner { display: block; }
 .record-detall-img { width: 100%; max-height: 300px; object-fit: cover; display: block; }
 .record-detall-body { padding: 20px 20px 32px; position: relative; }
 .record-detall-close { position: absolute; top: 16px; right: 16px; background: var(--cream); border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 18px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.record-detall-data { font-size: 11px; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; padding-right: 36px; }
+.record-detall-meta { font-size: 11px; color: var(--text-muted); letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 12px; padding-right: 36px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.record-detall-user { color: var(--accent); font-weight: 400; }
 .record-detall-text { font-size: 14px; font-weight: 300; color: var(--text); line-height: 1.75; margin-bottom: 16px; }
 .record-detall-actions { display: flex; gap: 16px; flex-wrap: wrap; }
 .record-detall-edit, .record-detall-portada, .record-detall-delete { font-size: 11px; color: var(--text-muted); background: none; border: none; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; padding: 0; }
@@ -142,7 +156,7 @@ body.picking .picking-banner { display: block; }
 .graella-overlay { display: none; position: fixed; inset: 0; background: var(--cream); z-index: 4000; flex-direction: column; }
 .graella-overlay.active { display: flex; }
 .graella-header { padding: 14px 16px; background: var(--warm-white); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
-.graella-title { font-size: 20px; font-style: italic; font-weight: 300; }
+.graella-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-style: italic; font-weight: 300; }
 .graella-close { margin-left: auto; background: none; border: none; font-size: 22px; color: var(--text-muted); cursor: pointer; }
 .graella-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 16px; }
 .graella-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; }
@@ -155,7 +169,7 @@ body.picking .picking-banner { display: block; }
 .graella-lloc-label { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(42,37,32,0.6)); color: white; font-size: 10px; padding: 16px 6px 5px; font-style: italic; }
 .loading { position: fixed; inset: 0; background: var(--cream); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; gap: 16px; transition: opacity 0.4s; }
 .loading.hidden { opacity: 0; pointer-events: none; }
-.loading-title { font-size: 28px; font-style: italic; font-weight: 300; color: var(--text); }
+.loading-title { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-style: italic; font-weight: 300; color: var(--text); }
 .loading-sub { font-size: 11px; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; }
 .leaflet-control-zoom { border: 1px solid var(--border) !important; border-radius: 2px !important; box-shadow: none !important; }
 .leaflet-control-zoom a { color: var(--text) !important; font-weight: 300 !important; border-color: var(--border) !important; width: 32px !important; height: 32px !important; line-height: 32px !important; }
@@ -167,11 +181,16 @@ body.picking .picking-banner { display: block; }
 <div class="login-screen" id="loginScreen">
   <div>
     <div class="login-title">feliç any i mig</div>
-    <div style="text-align:center;margin-top:6px;" class="login-sub">t'estimo ;)</div>
+    <div style="margin-top:6px;" class="login-sub">t'estimo ;)</div>
   </div>
   <div class="login-form">
-    <input type="password" class="login-input" id="loginInput" placeholder="·····" onkeydown="if(event.key==='Enter') comprovarCodi()">
-    <button class="login-btn" onclick="comprovarCodi()">Entrar</button>
+    <label style="text-align:center;margin-bottom:2px;">Qui ets?</label>
+    <div class="login-user-btns">
+      <button class="login-user-btn" id="btnJana" onclick="seleccionarUsuari('jana')">Jana</button>
+      <button class="login-user-btn" id="btnElia" onclick="seleccionarUsuari('elia')">Èlia</button>
+    </div>
+    <input type="password" class="login-input" id="loginInput" placeholder="contrasenya" onkeydown="if(event.key==='Enter') ferLogin()">
+    <button class="login-btn" onclick="ferLogin()">Entrar</button>
     <div class="login-error" id="loginError"></div>
   </div>
 </div>
@@ -191,6 +210,7 @@ body.picking .picking-banner { display: block; }
     <button class="btn-icon" onclick="sorpresa()">✦</button>
     <button class="btn-icon" onclick="obrirGraella()">⊞</button>
     <button class="btn-add" onclick="iniciarAfegirPin()">+ Lloc</button>
+    <button class="user-badge" id="userBadge" onclick="ferLogout()"></button>
   </div>
 </header>
 
@@ -198,7 +218,7 @@ body.picking .picking-banner { display: block; }
 <div class="picking-banner">Toca el mapa per triar la ubicació</div>
 <div class="toast" id="toast"></div>
 
-<!-- Modal: Nou lloc -->
+<!-- Modal: Nou / Editar lloc -->
 <div class="modal-overlay" id="modalLloc" onclick="tancarModalSiFons(event,'modalLloc')">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -210,20 +230,8 @@ body.picking .picking-banner { display: block; }
       <input type="text" id="inputNom">
     </div>
     <div class="form-group">
-      <label>Data</label>
-      <input type="date" id="inputData">
-    </div>
-    <div class="form-group">
-      <label>Descripció</label>
-      <textarea id="inputText" placeholder="algo especial a dir..."></textarea>
-    </div>
-    <div class="form-group" id="fotoLlocGroup">
-      <label>Foto (serà la portada)</label>
-      <div class="photo-upload-area">
-        <input type="file" accept="image/*" id="inputFoto" onchange="previsualitzar('inputFoto','fotoPreview')">
-        <div class="photo-upload-text">📷 Puja o fes una foto</div>
-      </div>
-      <img id="fotoPreview" class="photo-preview" alt="">
+      <label>Descripció del lloc</label>
+      <textarea id="inputDesc" placeholder="Descriu aquest lloc..."></textarea>
     </div>
     <div class="form-group" id="ubicacioGroup">
       <label>Ubicació</label>
@@ -241,7 +249,7 @@ body.picking .picking-banner { display: block; }
     <button class="modal-close" onclick="tancarModal('modalRecord')">×</button>
     <div class="modal-title" id="modalRecordTitol">Nou record</div>
     <div class="form-group">
-      <label>Data</label>
+      <label>Data (opcional)</label>
       <input type="date" id="recInputData">
     </div>
     <div class="form-group">
@@ -285,7 +293,6 @@ body.picking .picking-banner { display: block; }
 </div>
 
 <script>
-var CODI = 'elia';
 firebase.initializeApp({
   apiKey: "AIzaSyBprZ3QdL8RPwNH62cqUZA9fge5ylggLO8",
   authDomain: "mapa-b7373.firebaseapp.com",
@@ -295,25 +302,65 @@ firebase.initializeApp({
   appId: "1:532393871600:web:ccd5af66ecbfdb1df41a35"
 });
 var db = firebase.firestore();
+var auth = firebase.auth();
 
-function comprovarCodi() {
-  var val = document.getElementById('loginInput').value.trim().toLowerCase();
-  if (val === CODI) {
-    document.getElementById('loginScreen').classList.add('hidden');
-    inicialitzar();
-  } else {
-    document.getElementById('loginError').textContent = 'Codi incorrecte';
-    document.getElementById('loginInput').value = '';
-  }
+// ── LOGIN ──
+var usuariSeleccionat = null;
+
+function seleccionarUsuari(nom) {
+  usuariSeleccionat = nom;
+  document.getElementById('btnJana').classList.toggle('selected', nom === 'jana');
+  document.getElementById('btnElia').classList.toggle('selected', nom === 'elia');
+  document.getElementById('loginInput').focus();
 }
 
+function ferLogin() {
+  if (!usuariSeleccionat) { document.getElementById('loginError').textContent = 'Selecciona qui ets'; return; }
+  var pw = document.getElementById('loginInput').value;
+  if (!pw) { document.getElementById('loginError').textContent = 'Escriu la contrasenya'; return; }
+  document.getElementById('loginError').textContent = '';
+  auth.signInWithEmailAndPassword(usuariSeleccionat + '@nostre.app', pw)
+    .catch(function() {
+      document.getElementById('loginError').textContent = 'Contrasenya incorrecta';
+      document.getElementById('loginInput').value = '';
+    });
+}
+
+function ferLogout() {
+  if (!confirm('Tancar sessió?')) return;
+  auth.signOut();
+}
+
+auth.onAuthStateChanged(function(user) {
+  if (user) {
+    document.getElementById('loginScreen').classList.add('hidden');
+    usuariActual = user.email.split('@')[0];
+    document.getElementById('userBadge').textContent = usuariActual;
+    inicialitzar();
+  } else {
+    usuariActual = null;
+    inicialitzatJa = false;
+    document.getElementById('loginScreen').classList.remove('hidden');
+    document.getElementById('loginInput').value = '';
+    document.getElementById('loginError').textContent = '';
+    usuariSeleccionat = null;
+    document.getElementById('btnJana').classList.remove('selected');
+    document.getElementById('btnElia').classList.remove('selected');
+  }
+});
+
+// ── ESTAT ──
 var map = null, clusterGroup = null, coordsTriades = null;
-var fotoFileLloc = null, fotoFileRecord = null;
+var fotoFileRecord = null;
 var markers = {}, llocData = {};
 var picking = false, tempMarker = null;
 var recordsListener = null, llocActualId = null;
+var usuariActual = null, inicialitzatJa = false;
 
+// ── INIT ──
 function inicialitzar() {
+  if (inicialitzatJa) return;
+  inicialitzatJa = true;
   var inici = new Date('2024-09-20');
   document.getElementById('dies').textContent = Math.floor((new Date() - inici) / 86400000);
   map = L.map('map', { center: [41.5, 2.0], zoom: 7 });
@@ -345,11 +392,11 @@ function inicialitzar() {
   carregarPins();
 }
 
+// ── UTILS ──
 function previsualitzar(inputId, previewId) {
   var file = document.getElementById(inputId).files[0];
   if (!file) return;
-  if (inputId === 'inputFoto') fotoFileLloc = file;
-  else fotoFileRecord = file;
+  fotoFileRecord = file;
   var prev = document.getElementById(previewId);
   prev.src = URL.createObjectURL(file);
   prev.style.display = 'block';
@@ -383,7 +430,44 @@ function fmtData(d) {
   if (!d) return '';
   return new Date(d).toLocaleDateString('ca-ES', { year: 'numeric', month: 'long' });
 }
+function nomUsuari(u) {
+  if (!u) return '';
+  return u.charAt(0).toUpperCase() + u.slice(1);
+}
 
+// ── ICONES ──
+function iconPin() {
+  return L.divIcon({ className: '', html: '<div class="custom-pin"></div>', iconSize: [12,12], iconAnchor: [6,6] });
+}
+function iconFoto(foto) {
+  var html = foto ? '<div class="foto-pin-wrap"><img src="' + foto + '" alt=""></div>' : '<div class="foto-pin-wrap"></div>';
+  return L.divIcon({ className: '', html: html, iconSize: [48,48], iconAnchor: [24,24] });
+}
+function obtenirFotoPerPin(id, d, callback) {
+  if (d.portadaAleatoria) {
+    db.collection('llocs').doc(id).collection('records').get().then(function(snap) {
+      var ambFoto = [];
+      snap.forEach(function(doc) { if (doc.data().foto) ambFoto.push(doc.data().foto); });
+      callback(ambFoto.length > 0 ? ambFoto[Math.floor(Math.random() * ambFoto.length)] : null);
+    });
+  } else {
+    callback(d.portadaFoto || null);
+  }
+}
+function actualitzarIconesZoom() {
+  var zoom = map.getZoom();
+  Object.keys(markers).forEach(function(id) {
+    var d = llocData[id];
+    if (!d || !markers[id]) return;
+    if (zoom >= 12) {
+      obtenirFotoPerPin(id, d, function(foto) { if (markers[id]) markers[id].setIcon(iconFoto(foto)); });
+    } else {
+      markers[id].setIcon(iconPin());
+    }
+  });
+}
+
+// ── PINS ──
 function carregarPins() {
   db.collection('llocs').onSnapshot(function(snapshot) {
     snapshot.docChanges().forEach(function(change) {
@@ -403,52 +487,8 @@ function carregarPins() {
   });
 }
 
-function iconPin() {
-  return L.divIcon({ className: '', html: '<div class="custom-pin"></div>', iconSize: [12,12], iconAnchor: [6,6] });
-}
-
-function iconFoto(foto) {
-  var html = foto
-    ? '<div class="foto-pin-wrap"><img src="' + foto + '" alt=""></div>'
-    : '<div class="foto-pin-wrap"></div>';
-  return L.divIcon({ className: '', html: html, iconSize: [48,48], iconAnchor: [24,24] });
-}
-
-// Cache de fotos aleatories per pin (es regenera cada cop que es crida actualitzarIconesZoom)
-var fotoPinCache = {};
-
-function obtenirFotoPerPin(id, d, callback) {
-  if (d.portadaAleatoria) {
-    db.collection('llocs').doc(id).collection('records').get().then(function(snap) {
-      var ambFoto = [];
-      snap.forEach(function(doc) { if (doc.data().foto) ambFoto.push(doc.data().foto); });
-      var foto = ambFoto.length > 0 ? ambFoto[Math.floor(Math.random() * ambFoto.length)] : null;
-      fotoPinCache[id] = foto;
-      callback(foto);
-    });
-  } else {
-    callback(d.portadaFoto || null);
-  }
-}
-
-function actualitzarIconesZoom() {
-  var zoom = map.getZoom();
-  Object.keys(markers).forEach(function(id) {
-    var d = llocData[id];
-    if (!d || !markers[id]) return;
-    if (zoom >= 12) {
-      obtenirFotoPerPin(id, d, function(foto) {
-        if (markers[id]) markers[id].setIcon(iconFoto(foto));
-      });
-    } else {
-      markers[id].setIcon(iconPin());
-    }
-  });
-}
-
 function afegirMarker(id, d) {
   var zoom = map && map.getZoom ? map.getZoom() : 7;
-  var icon = iconPin();
   var fotoPopup = d.portadaFoto || null;
   var imatgeHTML = fotoPopup
     ? '<img class="popup-img" src="' + fotoPopup + '" alt="' + d.nom + '">'
@@ -456,35 +496,29 @@ function afegirMarker(id, d) {
   var popupHTML = imatgeHTML +
     '<div class="popup-inner">' +
       '<div class="popup-place">' + d.nom + '</div>' +
-      (d.data ? '<div class="popup-date">' + fmtData(d.data) + '</div>' : '') +
-      (d.text ? '<div class="popup-text">' + d.text + '</div>' : '') +
+      (d.desc ? '<div class="popup-text">' + d.desc + '</div>' : '') +
       '<div class="popup-actions">' +
         '<button class="popup-btn-enter" onclick="obrirLloc(\'' + id + '\')">Veure records →</button>' +
         '<button class="popup-delete" onclick="eliminarLloc(\'' + id + '\')">Eliminar</button>' +
       '</div>' +
     '</div>';
   var popup = L.popup({ maxWidth: 230, closeButton: false }).setContent(popupHTML);
-  var marker = L.marker([d.lat, d.lng], { icon: icon }).bindPopup(popup);
+  var marker = L.marker([d.lat, d.lng], { icon: iconPin() }).bindPopup(popup);
   clusterGroup.addLayer(marker);
   markers[id] = marker;
   if (zoom >= 12) {
-    obtenirFotoPerPin(id, d, function(foto) {
-      if (markers[id]) markers[id].setIcon(iconFoto(foto));
-    });
+    obtenirFotoPerPin(id, d, function(foto) { if (markers[id]) markers[id].setIcon(iconFoto(foto)); });
   }
 }
 
+// ── LLOC ──
 function iniciarAfegirPin() {
-  fotoFileLloc = null; coordsTriades = null;
+  coordsTriades = null;
   document.getElementById('editLlocId').value = '';
   document.getElementById('modalLlocTitol').textContent = 'Nou lloc';
   document.getElementById('inputNom').value = '';
-  document.getElementById('inputData').value = '';
-  document.getElementById('inputText').value = '';
+  document.getElementById('inputDesc').value = '';
   document.getElementById('coordsDisplay').textContent = 'Cap ubicació triada';
-  document.getElementById('fotoPreview').style.display = 'none';
-  document.getElementById('inputFoto').value = '';
-  document.getElementById('fotoLlocGroup').style.display = 'block';
   document.getElementById('ubicacioGroup').style.display = 'block';
   document.getElementById('btnDesarLloc').textContent = 'Desar lloc';
   document.getElementById('modalLloc').classList.add('active');
@@ -492,16 +526,12 @@ function iniciarAfegirPin() {
 
 function editarLloc(id) {
   var d = llocData[id]; if (!d) return;
-  fotoFileLloc = null;
   document.getElementById('editLlocId').value = id;
   document.getElementById('modalLlocTitol').textContent = 'Editar lloc';
   document.getElementById('inputNom').value = d.nom || '';
-  document.getElementById('inputData').value = d.data || '';
-  document.getElementById('inputText').value = d.text || '';
+  document.getElementById('inputDesc').value = d.desc || '';
   coordsTriades = { lat: d.lat, lng: d.lng };
-  document.getElementById('fotoLlocGroup').style.display = 'none';
   document.getElementById('ubicacioGroup').style.display = 'none';
-  document.getElementById('fotoPreview').style.display = 'none';
   document.getElementById('btnDesarLloc').textContent = 'Desar canvis';
   tancarLloc();
   document.getElementById('modalLloc').classList.add('active');
@@ -515,38 +545,28 @@ function triarUbicacioAlMapa() {
 
 function desarLloc() {
   var nom = document.getElementById('inputNom').value.trim();
-  var data = document.getElementById('inputData').value;
-  var text = document.getElementById('inputText').value.trim();
+  var desc = document.getElementById('inputDesc').value.trim();
   var editId = document.getElementById('editLlocId').value;
   if (!nom) { mostrarToast('Escriu el nom del lloc'); return; }
   if (!editId && !coordsTriades) { mostrarToast('Tria la ubicació al mapa'); return; }
   var btn = document.getElementById('btnDesarLloc');
   btn.disabled = true; btn.textContent = 'Desant...';
-
-  var guardar = function(foto) {
-    if (editId) {
-      db.collection('llocs').doc(editId).update({ nom: nom, data: data || null, text: text || null })
-        .then(function() { tancarModal('modalLloc'); mostrarToast('Lloc actualitzat!'); })
-        .catch(function(e) { console.error(e); mostrarToast('Error en desar.'); })
-        .finally(function() { btn.disabled = false; btn.textContent = 'Desar canvis'; });
-    } else {
-      var dades = { nom: nom, data: data || null, text: text || null, lat: coordsTriades.lat, lng: coordsTriades.lng, portadaFoto: foto || null, portadaRecordId: null, creatEl: firebase.firestore.FieldValue.serverTimestamp() };
-      db.collection('llocs').add(dades).then(function(ref) {
-        var primerRecord = { data: data || null, text: text || null, foto: foto || null, esPortada: true, creatEl: firebase.firestore.FieldValue.serverTimestamp() };
-        return ref.collection('records').add(primerRecord).then(function(recRef) {
-          return ref.update({ portadaRecordId: recRef.id });
-        });
-      }).then(function() {
-        if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; }
-        tancarModal('modalLloc');
-        mostrarToast('Lloc desat!');
-      }).catch(function(e) { console.error(e); mostrarToast('Error en desar.'); })
-        .finally(function() { btn.disabled = false; btn.textContent = 'Desar lloc'; });
-    }
-  };
-
-  if (fotoFileLloc) { btn.textContent = 'Comprimint foto...'; comprimirImatge(fotoFileLloc).then(guardar); }
-  else guardar(null);
+  if (editId) {
+    db.collection('llocs').doc(editId).update({ nom: nom, desc: desc || null })
+      .then(function() { tancarModal('modalLloc'); mostrarToast('Lloc actualitzat!'); })
+      .catch(function(e) { console.error(e); mostrarToast('Error en desar.'); })
+      .finally(function() { btn.disabled = false; btn.textContent = 'Desar canvis'; });
+  } else {
+    db.collection('llocs').add({
+      nom: nom, desc: desc || null, lat: coordsTriades.lat, lng: coordsTriades.lng,
+      portadaFoto: null, portadaRecordId: null, portadaAleatoria: false,
+      creatEl: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(function() {
+      if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; }
+      tancarModal('modalLloc'); mostrarToast('Lloc desat!');
+    }).catch(function(e) { console.error(e); mostrarToast('Error en desar.'); })
+      .finally(function() { btn.disabled = false; btn.textContent = 'Desar lloc'; });
+  }
 }
 
 function eliminarLloc(id) {
@@ -559,6 +579,7 @@ function eliminarLloc(id) {
   }).then(function() { mostrarToast('Lloc eliminat'); });
 }
 
+// ── OBRIR LLOC ──
 function obrirLloc(id) {
   llocActualId = id;
   if (recordsListener) { recordsListener(); recordsListener = null; }
@@ -568,20 +589,30 @@ function obrirLloc(id) {
 
 function renderitzarLloc(id) {
   var d = llocData[id] || {};
-  var portadaFoto = d.portadaFoto || null;
+  if (d.portadaAleatoria) {
+    db.collection('llocs').doc(id).collection('records').get().then(function(snap) {
+      var ambFoto = [];
+      snap.forEach(function(doc) { if (doc.data().foto) ambFoto.push(doc.data().foto); });
+      construirLloc(id, d, ambFoto.length > 0 ? ambFoto[Math.floor(Math.random() * ambFoto.length)] : null, true);
+    });
+  } else {
+    construirLloc(id, d, d.portadaFoto || null, false);
+  }
+}
+
+function construirLloc(id, d, portadaFoto, esAleatoria) {
   var imatgeHTML = portadaFoto
-    ? '<div class="lloc-header"><img class="lloc-header-img" src="' + portadaFoto + '" alt=""><span class="lloc-header-badge">portada</span></div>'
+    ? '<div class="lloc-header"><img class="lloc-header-img" src="' + portadaFoto + '" alt=""><span class="lloc-header-badge">' + (esAleatoria ? 'aleatoria' : 'portada') + '</span></div>'
     : '<div class="lloc-header"><div class="lloc-header-nofoto"></div></div>';
   document.getElementById('llocScroll').innerHTML =
     imatgeHTML +
     '<div class="lloc-info">' +
       '<button class="lloc-close" onclick="tancarLloc()">×</button>' +
       '<div class="lloc-nom">' + (d.nom || '') + '</div>' +
-      (d.data ? '<div class="lloc-data">' + fmtData(d.data) + '</div>' : '') +
-      (d.text ? '<div class="lloc-text">' + d.text + '</div>' : '') +
+      (d.desc ? '<div class="lloc-desc">' + d.desc + '</div>' : '') +
       '<div class="lloc-accions">' +
         '<button class="lloc-edit-btn" onclick="editarLloc(\'' + id + '\')">Editar</button>' +
-        '<button class="lloc-portada-btn" onclick="triarPortadaAleatoria(\'' + id + '\')">Portada aleatòria</button>' +
+        '<button class="lloc-portada-btn ' + (esAleatoria ? 'actiu' : '') + '" onclick="togglePortadaAleatoria(\'' + id + '\')">' + (esAleatoria ? '✓ ' : '') + 'portada aleatòria</button>' +
       '</div>' +
     '</div>' +
     '<div class="lloc-records-header">' +
@@ -600,27 +631,43 @@ function tancarLloc() {
 }
 function tancarLlocSiFons(e) { if (e.target === document.getElementById('llocOverlay')) tancarLloc(); }
 
+// ── PORTADA ──
+function togglePortadaAleatoria(llocId) {
+  var d = llocData[llocId] || {};
+  var activar = !d.portadaAleatoria;
+  var dades = { portadaAleatoria: activar };
+  if (activar) {
+    // Desactivem portada fixa i traiem badges
+    dades.portadaRecordId = null;
+    db.collection('llocs').doc(llocId).collection('records').get().then(function(snap) {
+      var batch = db.batch();
+      snap.forEach(function(doc) { if (doc.data().esPortada) batch.update(doc.ref, { esPortada: false }); });
+      batch.commit();
+    });
+  }
+  db.collection('llocs').doc(llocId).update(dades).then(function() {
+    mostrarToast(activar ? 'Portada aleatòria activada' : 'Portada aleatòria desactivada');
+    renderitzarLloc(llocId);
+  });
+}
+
 function establirPortada(llocId, recordId, fotoRecord) {
-  var batch = db.batch();
-  batch.update(db.collection('llocs').doc(llocId), { portadaFoto: fotoRecord || null, portadaRecordId: recordId });
+  // Establir portada fixa desactiva l'aleatori
   db.collection('llocs').doc(llocId).collection('records').get().then(function(snap) {
+    var batch = db.batch();
+    batch.update(db.collection('llocs').doc(llocId), {
+      portadaFoto: fotoRecord || null, portadaRecordId: recordId, portadaAleatoria: false
+    });
     snap.forEach(function(doc) { batch.update(doc.ref, { esPortada: doc.id === recordId }); });
     return batch.commit();
   }).then(function() {
-    mostrarToast('Portada actualitzada!');
+    mostrarToast('Portada establerta!');
     tancarRecordDetall();
     renderitzarLloc(llocId);
   });
 }
 
-function triarPortadaAleatoria(llocId) {
-  db.collection('llocs').doc(llocId).update({ portadaAleatoria: true })
-    .then(function() {
-      mostrarToast('Mode portada aleatoria activat!');
-      renderitzarLloc(llocId);
-    });
-}
-
+// ── RECORDS ──
 function carregarRecords(llocId) {
   if (recordsListener) recordsListener();
   recordsListener = db.collection('llocs').doc(llocId).collection('records').orderBy('creatEl', 'asc')
@@ -628,23 +675,27 @@ function carregarRecords(llocId) {
       var grid = document.getElementById('recordsGrid');
       var buit = document.getElementById('recordsEmpty');
       if (!grid) return;
-      var portadaId = (llocData[llocId] && llocData[llocId].portadaRecordId) || null;
+      var d = llocData[llocId] || {};
+      var portadaId = (!d.portadaAleatoria && d.portadaRecordId) || null;
       snapshot.docChanges().forEach(function(change) {
         var id = change.doc.id, r = change.doc.data();
-        var esPortada = (id === portadaId) || r.esPortada;
+        var esPortada = !d.portadaAleatoria && ((id === portadaId) || r.esPortada);
         if (change.type === 'added' || change.type === 'modified') {
           var existent = document.getElementById('rc-' + id);
           var card = existent || document.createElement('div');
           card.className = 'record-card' + (esPortada ? ' es-portada' : '');
           card.id = 'rc-' + id;
           card.onclick = (function(rid, rdata) { return function() { obrirRecordDetall(llocId, rid, rdata); }; })(id, r);
+          var metaHTML = (r.data || r.usuari)
+            ? '<div class="record-card-meta">' +
+                (r.data ? '<span>' + fmtData(r.data) + '</span>' : '') +
+                (r.usuari ? '<span class="record-card-user">' + nomUsuari(r.usuari) + '</span>' : '') +
+              '</div>'
+            : '';
           card.innerHTML =
             (esPortada ? '<div class="record-portada-badge">portada</div>' : '') +
             (r.foto ? '<img class="record-card-img" src="' + r.foto + '" alt="">' : '<div class="record-card-nofoto"><span>✦</span></div>') +
-            '<div class="record-card-body">' +
-              (r.data ? '<div class="record-card-data">' + fmtData(r.data) + '</div>' : '') +
-              (r.text ? '<div class="record-card-text">' + r.text + '</div>' : '') +
-            '</div>';
+            '<div class="record-card-body">' + metaHTML + (r.text ? '<div class="record-card-text">' + r.text + '</div>' : '') + '</div>';
           if (!existent) grid.appendChild(card);
         }
         if (change.type === 'removed') { var rem = document.getElementById('rc-' + id); if (rem) rem.remove(); }
@@ -654,18 +705,25 @@ function carregarRecords(llocId) {
 }
 
 function obrirRecordDetall(llocId, recordId, r) {
-  var esPortada = (llocData[llocId] && llocData[llocId].portadaRecordId === recordId) || r.esPortada;
+  var d = llocData[llocId] || {};
+  var esPortada = !d.portadaAleatoria && ((d.portadaRecordId === recordId) || r.esPortada);
   var fotoEsc = r.foto ? '\'' + r.foto.replace(/'/g, '') + '\'' : 'null';
+  var metaHTML = (r.data || r.usuari)
+    ? '<div class="record-detall-meta">' +
+        (r.data ? '<span>' + fmtData(r.data) + '</span>' : '') +
+        (r.usuari ? '<span class="record-detall-user">' + nomUsuari(r.usuari) + '</span>' : '') +
+      '</div>'
+    : '';
   document.getElementById('recordDetall').innerHTML =
     '<div class="record-detall-drag"></div>' +
     (r.foto ? '<img class="record-detall-img" src="' + r.foto + '" alt="">' : '') +
     '<div class="record-detall-body">' +
       '<button class="record-detall-close" onclick="tancarRecordDetall()">×</button>' +
-      (r.data ? '<div class="record-detall-data">' + fmtData(r.data) + (esPortada ? ' · portada' : '') + '</div>' : '') +
+      metaHTML +
       (r.text ? '<div class="record-detall-text">' + r.text + '</div>' : '') +
       '<div class="record-detall-actions">' +
         '<button class="record-detall-edit" onclick="editarRecord(\'' + llocId + '\',\'' + recordId + '\')">Editar</button>' +
-        (!esPortada ? '<button class="record-detall-portada" onclick="establirPortada(\'' + llocId + '\',\'' + recordId + '\',' + fotoEsc + ')">Fer portada</button>' : '') +
+        (!esPortada && r.foto ? '<button class="record-detall-portada" onclick="establirPortada(\'' + llocId + '\',\'' + recordId + '\',' + fotoEsc + ')">Fer portada</button>' : '') +
         '<button class="record-detall-delete" onclick="eliminarRecord(\'' + llocId + '\',\'' + recordId + '\')">Eliminar</button>' +
       '</div>' +
     '</div>';
@@ -689,12 +747,8 @@ function iniciarAfegirRecord(llocId) {
     document.getElementById('modalRecord').classList.add('active');
   };
   var overlay = document.getElementById('recordOverlay');
-  if (overlay.classList.contains('active')) {
-    overlay.classList.remove('active');
-    setTimeout(obrirFormulari, 250);
-  } else {
-    obrirFormulari();
-  }
+  if (overlay.classList.contains('active')) { overlay.classList.remove('active'); setTimeout(obrirFormulari, 50); }
+  else obrirFormulari();
 }
 
 function editarRecord(llocId, recordId) {
@@ -724,7 +778,7 @@ function desarRecord() {
   btn.disabled = true; btn.textContent = 'Desant...';
 
   var guardar = function(foto) {
-    var dades = { data: data || null, text: text || null };
+    var dades = { data: data || null, text: text || null, usuari: usuariActual };
     if (foto !== undefined) dades.foto = foto;
     var p;
     if (recordId) {
@@ -741,7 +795,6 @@ function desarRecord() {
      .catch(function(e) { console.error(e); mostrarToast('Error en desar.'); })
      .finally(function() { btn.disabled = false; btn.textContent = recordId ? 'Desar canvis' : 'Desar record'; });
   };
-
   if (fotoFileRecord) { btn.textContent = 'Comprimint foto...'; comprimirImatge(fotoFileRecord).then(guardar); }
   else guardar(undefined);
 }
@@ -755,6 +808,7 @@ function eliminarRecord(llocId, recordId) {
   }).then(function() { mostrarToast('Record eliminat'); });
 }
 
+// ── SORPRESA ──
 function sorpresa() {
   var ids = Object.keys(llocData);
   if (ids.length === 0) { mostrarToast('Encara no hi ha llocs!'); return; }
@@ -763,6 +817,7 @@ function sorpresa() {
   setTimeout(function() { if (markers[id]) markers[id].openPopup(); }, 600);
 }
 
+// ── GRAELLA ──
 function obrirGraella() {
   document.getElementById('graellaOverlay').classList.add('active');
   var grid = document.getElementById('graellaGrid');
