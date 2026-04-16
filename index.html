@@ -294,6 +294,13 @@ body.picking .picking-banner { display: block; }
       </div>
       <img id="recFotoPreview" class="photo-preview" alt="">
     </div>
+    <div class="form-group" id="recUsuariGroup">
+  <label>Creat per:</label>
+  <div class="login-user-btns">
+    <button type="button" class="login-user-btn" data-usuari="jana" onclick="seleccionarUsuariRecord('jana')">Jana</button>
+    <button type="button" class="login-user-btn" data-usuari="elia" onclick="seleccionarUsuariRecord('elia')">Èlia</button>
+  </div>
+</div>
     <button class="btn-save" id="btnDesarRecord" onclick="desarRecord()">Desar record</button>
   </div>
 </div>
@@ -793,6 +800,7 @@ function iniciarAfegirRecord(llocId) {
     document.getElementById('btnDesarRecord').dataset.llocId = llocId;
     document.getElementById('btnDesarRecord').dataset.recordId = '';
     document.getElementById('btnDesarRecord').textContent = 'Desar record';
+    seleccionarUsuariRecord(usuariActual);
     document.getElementById('modalRecord').classList.add('active');
   };
   var overlay = document.getElementById('recordOverlay');
@@ -810,6 +818,8 @@ function editarRecord(llocId, recordId) {
     if (r.foto) { document.getElementById('recFotoPreview').src = r.foto; document.getElementById('recFotoPreview').style.display = 'block'; }
     else document.getElementById('recFotoPreview').style.display = 'none';
     document.getElementById('recInputFoto').value = '';
+    // Seleccionar usuari actual del record
+    seleccionarUsuariRecord(r.usuari || usuariActual);
     document.getElementById('btnDesarRecord').dataset.llocId = llocId;
     document.getElementById('btnDesarRecord').dataset.recordId = recordId;
     document.getElementById('btnDesarRecord').textContent = 'Desar canvis';
@@ -827,7 +837,8 @@ function desarRecord() {
   btn.disabled = true; btn.textContent = 'Desant...';
 
   var guardar = function(foto) {
-    var dades = { data: data || null, text: text || null, usuari: usuariActual };
+    var usuariTriat = document.querySelector('#recUsuariGroup .login-user-btn.selected');
+    var dades = { data: data || null, text: text || null, usuari: usuariTriat ? usuariTriat.dataset.usuari : usuariActual };
     if (foto !== undefined) dades.foto = foto;
     var p;
     if (recordId) {
@@ -1044,6 +1055,11 @@ function obrirStats() {
   });
 }
 function tancarStats() { document.getElementById('statsOverlay').classList.remove('active'); }
+function seleccionarUsuariRecord(nom) {
+  document.querySelectorAll('#recUsuariGroup .login-user-btn').forEach(function(btn) {
+    btn.classList.toggle('selected', btn.dataset.usuari === nom);
+  });
+}
 </script>
 </body>
 </html>
