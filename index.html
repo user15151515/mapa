@@ -155,9 +155,17 @@ body.picking .picking-banner { display: block; }
 .record-detall-delete:active { color: var(--danger); }
 .graella-overlay { display: none; position: fixed; inset: 0; background: var(--cream); z-index: 4000; flex-direction: column; }
 .graella-overlay.active { display: flex; }
-.graella-header { padding: 14px 16px; background: var(--warm-white); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.graella-header { padding: 12px 16px; background: var(--warm-white); border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
+.graella-header-top { display: flex; align-items: center; gap: 12px; }
 .graella-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-style: italic; font-weight: 300; }
 .graella-close { margin-left: auto; background: none; border: none; font-size: 22px; color: var(--text-muted); cursor: pointer; }
+.graella-filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.graella-filter-label { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); }
+.graella-filter-select { font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 300; color: var(--text); background: var(--cream); border: 1px solid var(--border); border-radius: 2px; padding: 5px 8px; outline: none; cursor: pointer; -webkit-appearance: none; appearance: none; padding-right: 22px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239a9088'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 7px center; }
+.graella-filter-select:focus { border-color: var(--accent); }
+.graella-filter-btn { font-family: 'DM Sans', sans-serif; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); background: var(--cream); border: 1px solid var(--border); border-radius: 2px; padding: 5px 10px; cursor: pointer; }
+.graella-filter-btn.actiu { color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
+.graella-count { font-size: 10px; color: var(--text-muted); letter-spacing: 0.06em; margin-left: auto; }
 .graella-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 16px; }
 .graella-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; }
 @media (min-width: 500px) { .graella-grid { grid-template-columns: repeat(4, 1fr); gap: 4px; } }
@@ -332,8 +340,25 @@ body.picking .picking-banner { display: block; }
 <!-- Graella global -->
 <div class="graella-overlay" id="graellaOverlay">
   <div class="graella-header">
-    <div class="graella-title">tots els records</div>
-    <button class="graella-close" onclick="tancarGraella()">×</button>
+    <div class="graella-header-top">
+      <div class="graella-title">tots els records</div>
+      <button class="graella-close" onclick="tancarGraella()">×</button>
+    </div>
+    <div class="graella-filters">
+      <span class="graella-filter-label">Ordenar per</span>
+      <select class="graella-filter-select" id="graellaOrdreCamp" onchange="renderitzarGraella()">
+        <option value="creatEl">data creació</option>
+        <option value="data">data record</option>
+        <option value="usuari">persona</option>
+      </select>
+      <select class="graella-filter-select" id="graellaOrdreDir" onchange="renderitzarGraella()">
+        <option value="desc">&#8595; recent primer</option>
+        <option value="asc">&#8593; antic primer</option>
+      </select>
+      <button class="graella-filter-btn" id="filtreBtnJana" onclick="toggleFiltreUsuari('jana')">Jana</button>
+      <button class="graella-filter-btn" id="filtreBtnElia" onclick="toggleFiltreUsuari('elia')">Elia</button>
+      <span class="graella-count" id="graellaCount"></span>
+    </div>
   </div>
   <div class="graella-scroll">
     <div class="graella-grid" id="graellaGrid"></div>
@@ -878,43 +903,72 @@ function sorpresa() {
 }
 
 // ── GRAELLA ──
-function obrirGraella() {
-  document.getElementById('graellaOverlay').classList.add('active');
+var graellaTots = [];
+var graellaFiltreUsuaris = {};
+
+function toggleFiltreUsuari(usuari) {
+  graellaFiltreUsuaris[usuari] = !graellaFiltreUsuaris[usuari];
+  document.getElementById('filtreBtnJana').classList.toggle('actiu', !!graellaFiltreUsuaris['jana']);
+  document.getElementById('filtreBtnElia').classList.toggle('actiu', !!graellaFiltreUsuaris['elia']);
+  renderitzarGraella();
+}
+
+function renderitzarGraella() {
   var grid = document.getElementById('graellaGrid');
+  if (!grid) return;
+  var camp = document.getElementById('graellaOrdreCamp').value;
+  var dir = document.getElementById('graellaOrdreDir').value;
+  var filtraUsuaris = Object.values(graellaFiltreUsuaris).some(function(v) { return v; });
+  var filtrats = graellaTots.filter(function(item) {
+    if (!filtraUsuaris) return true;
+    return graellaFiltreUsuaris[item.data.usuari] === true;
+  });
+  filtrats.sort(function(a, b) {
+    var va, vb;
+    if (camp === 'creatEl') {
+      va = a.data.creatEl ? (a.data.creatEl.toDate ? a.data.creatEl.toDate().getTime() : new Date(a.data.creatEl).getTime()) : 0;
+      vb = b.data.creatEl ? (b.data.creatEl.toDate ? b.data.creatEl.toDate().getTime() : new Date(b.data.creatEl).getTime()) : 0;
+    } else if (camp === 'data') {
+      va = a.data.data ? new Date(a.data.data).getTime() : 0;
+      vb = b.data.data ? new Date(b.data.data).getTime() : 0;
+    } else if (camp === 'usuari') {
+      va = a.data.usuari || '';
+      vb = b.data.usuari || '';
+      return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+    }
+    return dir === 'asc' ? va - vb : vb - va;
+  });
+  var countEl = document.getElementById('graellaCount');
+  if (countEl) countEl.textContent = filtrats.length + ' records';
   grid.innerHTML = '';
-  var ids = Object.keys(llocData);
-  if (ids.length === 0) { grid.innerHTML = '<p style="padding:20px;color:var(--text-muted);font-style:italic;grid-column:1/-1;">Encara no hi ha llocs.</p>'; return; }
-  Promise.all(ids.map(function(llocId) {
-    return db.collection('llocs').doc(llocId).collection('records').get().then(function(snap) {
-      var items = [];
-      snap.forEach(function(doc) { items.push({ llocId: llocId, recordId: doc.id, data: doc.data(), nom: llocData[llocId] ? llocData[llocId].nom : '' }); });
-      return items;
-    });
-  })).then(function(resultats) {
-    var tots = [];
-    resultats.forEach(function(items) { tots = tots.concat(items); });
-    if (tots.length === 0) { grid.innerHTML = '<p style="padding:20px;color:var(--text-muted);font-style:italic;grid-column:1/-1;">Encara no hi ha records.</p>'; return; }
-    tots.forEach(function(item) {
-      var el = document.createElement('div');
-      el.className = 'graella-item';
-      el.innerHTML = item.data.foto
-        ? '<img src="' + item.data.foto + '" alt="' + item.nom + '"><div class="graella-lloc-label">' + item.nom + '</div>'
-        : '<div class="graella-item-nofoto"><span>' + item.nom + '</span></div>';
-      el.onclick = function() {
-        recordOvertFromGraella = true;
-        // Bajar z-index de la graella para que el record quede encima
-        document.getElementById('graellaOverlay').style.zIndex = '2500';
-        obrirRecordDetall(item.llocId, item.recordId, item.data);
-      };
-      grid.appendChild(el);
-    });
+  if (filtrats.length === 0) {
+    grid.innerHTML = '<p style="padding:20px;color:var(--text-muted);font-style:italic;grid-column:1/-1;">Cap record amb aquest filtre.</p>';
+    return;
+  }
+  filtrats.forEach(function(item) {
+    var el = document.createElement('div');
+    el.className = 'graella-item';
+    el.innerHTML = item.data.foto
+      ? '<img src="' + item.data.foto + '" alt="' + item.nom + '"><div class="graella-lloc-label">' + item.nom + '</div>'
+      : '<div class="graella-item-nofoto"><span>' + item.nom + '</span></div>';
+    el.onclick = function() {
+      recordOvertFromGraella = true;
+      document.getElementById('graellaOverlay').style.zIndex = '2500';
+      obrirRecordDetall(item.llocId, item.recordId, item.data);
+    };
+    grid.appendChild(el);
   });
 }
 
 function obrirGraella() {
+  graellaFiltreUsuaris = {};
+  document.getElementById('filtreBtnJana').classList.remove('actiu');
+  document.getElementById('filtreBtnElia').classList.remove('actiu');
+  document.getElementById('graellaOrdreCamp').value = 'creatEl';
+  document.getElementById('graellaOrdreDir').value = 'desc';
   document.getElementById('graellaOverlay').classList.add('active');
   var grid = document.getElementById('graellaGrid');
-  grid.innerHTML = '';
+  grid.innerHTML = '<p style="padding:20px;color:var(--text-muted);font-style:italic;grid-column:1/-1;">Carregant...</p>';
   var ids = Object.keys(llocData);
   if (ids.length === 0) { grid.innerHTML = '<p style="padding:20px;color:var(--text-muted);font-style:italic;grid-column:1/-1;">Encara no hi ha llocs.</p>'; return; }
   Promise.all(ids.map(function(llocId) {
@@ -924,23 +978,10 @@ function obrirGraella() {
       return items;
     });
   })).then(function(resultats) {
-    var tots = [];
-    resultats.forEach(function(items) { tots = tots.concat(items); });
-    if (tots.length === 0) { grid.innerHTML = '<p style="padding:20px;color:var(--text-muted);font-style:italic;grid-column:1/-1;">Encara no hi ha records.</p>'; return; }
-    tots.forEach(function(item) {
-      var el = document.createElement('div');
-      el.className = 'graella-item';
-      el.innerHTML = item.data.foto
-        ? '<img src="' + item.data.foto + '" alt="' + item.nom + '"><div class="graella-lloc-label">' + item.nom + '</div>'
-        : '<div class="graella-item-nofoto"><span>' + item.nom + '</span></div>';
-      el.onclick = function() {
-        recordOvertFromGraella = true;
-        // Bajar z-index de la graella para que el record quede encima
-        document.getElementById('graellaOverlay').style.zIndex = '2500';
-        obrirRecordDetall(item.llocId, item.recordId, item.data);
-      };
-      grid.appendChild(el);
-    });
+    graellaTots = [];
+    resultats.forEach(function(items) { graellaTots = graellaTots.concat(items); });
+    if (graellaTots.length === 0) { grid.innerHTML = '<p style="padding:20px;color:var(--text-muted);font-style:italic;grid-column:1/-1;">Encara no hi ha records.</p>'; return; }
+    renderitzarGraella();
   });
 }
 
